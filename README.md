@@ -165,7 +165,7 @@ I sincerely thank **Moptra Infotech** for giving me this opportunity to work on 
 
 ## 📬 Contact
 - 📧 Email: [ruthmys123@gmail.com](mailto:ruthmys123@gmail.com)  
-- 🔗 LinkedIn: [linkedin.com/in/ruthveek](https://linkedin.com/in/ruthveek)  
+- 🔗 LinkedIn: [https://www.linkedin.com/in/ruthveek-m-r-0a495b1ba/](https://www.linkedin.com/in/ruthveek-m-r-0a495b1ba/)  
 - 💻 GitHub: [github.com/RuthveekMR](https://github.com/RuthveekMR)
 
 ---
