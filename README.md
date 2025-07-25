@@ -34,7 +34,8 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ├── models.py / models.cpython-313.pyc
 ├── schemas.py / schemas.cpython-313.pyc
 ├── main.py / main.cpython-313.pyc
-└── README.md                      # 📄 This file  ```
+└── README.md                      # 📄 This file
+```
 
 ---
 ## 📦 Dataset Used
