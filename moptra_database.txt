@@ -1,0 +1,1969 @@
+postgres=# CREATE DATABASE moptra_ecommerce;
+CREATE DATABASE
+postgres=# \c moptra_ecommerce
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# CREATE TABLE temp_table(customer_id VARCHAR(100),customer_unique_id VARCHAR(100) PRIMARY KEY,customer_zip_code_prefix INTEGER,customer_city VARCHAR(50),customer_state CHAR(2));
+CREATE TABLE
+moptra_ecommerce=# DESCRIBE temp_table
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near "DESCRIBE"
+LINE 1: DESCRIBE temp_table
+        ^
+moptra_ecommerce=# \d temp_table
+                             Table "public.temp_table"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           |          |
+ customer_unique_id       | character varying(100) |           | not null |
+ customer_zip_code_prefix | integer                |           |          |
+ customer_city            | character varying(50)  |           |          |
+ customer_state           | character(2)           |           |          |
+Indexes:
+    "temp_table_pkey" PRIMARY KEY, btree (customer_unique_id)
+
+
+moptra_ecommerce=# drop table temp_table;
+DROP TABLE
+moptra_ecommerce=# CREATE TABLE orders_temp(order_id VARCHAR(100) PRIMARY KEY,customer_id VARCHAR(100),
+moptra_ecommerce(# order_status VARCHAR(20),
+moptra_ecommerce(# order_purchase_timestamp TIMESTAMP,
+moptra_ecommerce(# order_approved_at TIMESTAMP,
+moptra_ecommerce(# order_delivered_carrier_date TIMESTAMP,
+moptra_ecommerce(# order_delivered_customer_date TIMESTAMP,
+moptra_ecommerce(# order_estimated_delivery_date TIMESTAMP);
+CREATE TABLE
+moptra_ecommerce=# \d orders_temp
+                                  Table "public.orders_temp"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "orders_temp_pkey" PRIMARY KEY, btree (order_id)
+
+
+moptra_ecommerce=# \COPY orders_temp FROM 'C:/Users/Ruthveek/OneDrive/Documents/Projects/Moptra Infotech - ECommerce Database Management/.csv files/olist_orders_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 99441
+moptra_ecommerce=# SELECT * FROM orders_temp LIMIT 5;
+             order_id             |           customer_id            | order_status | order_purchase_timestamp |  order_approved_at  | order_delivered_carrier_date | order_delivered_customer_date | order_estimated_delivery_date
+----------------------------------+----------------------------------+--------------+--------------------------+---------------------+------------------------------+-------------------------------+-------------------------------
+ e481f51cbdc54678b7cc49136f2d6af7 | 9ef432eb6251297304e76186b10a928d | delivered    | 2017-10-02 10:56:33      | 2017-10-02 11:07:15 | 2017-10-04 19:55:00          | 2017-10-10 21:25:13           | 2017-10-18 00:00:00
+ 53cdb2fc8bc7dce0b6741e2150273451 | b0830fb4747a6c6d20dea0b8c802d7ef | delivered    | 2018-07-24 20:41:37      | 2018-07-26 03:24:27 | 2018-07-26 14:31:00          | 2018-08-07 15:27:45           | 2018-08-13 00:00:00
+ 47770eb9100c2d0c44946d9cf07ec65d | 41ce2a54c0b03bf3443c3d931a367089 | delivered    | 2018-08-08 08:38:49      | 2018-08-08 08:55:23 | 2018-08-08 13:50:00          | 2018-08-17 18:06:29           | 2018-09-04 00:00:00
+ 949d5b44dbf5de918fe9c16f97b45f8a | f88197465ea7920adcdbec7375364d82 | delivered    | 2017-11-18 19:28:06      | 2017-11-18 19:45:59 | 2017-11-22 13:39:59          | 2017-12-02 00:28:42           | 2017-12-15 00:00:00
+ ad21c59c0840e6cb83a9ceb5573f8159 | 8ab97904e6daea8866dbdbc4fb7aad2c | delivered    | 2018-02-13 21:18:39      | 2018-02-13 22:20:29 | 2018-02-14 19:46:34          | 2018-02-16 18:17:02           | 2018-02-26 00:00:00
+(5 rows)
+
+
+moptra_ecommerce=# SELECT *,COUNT(*) FROM orders_temp GROUP BY ALL columns HAVING COUNT(*)>1;
+ERROR:  column "columns" does not exist
+LINE 1: SELECT *,COUNT(*) FROM orders_temp GROUP BY ALL columns HAVI...
+                                                        ^
+moptra_ecommerce=# SELECT *,COUNT(*) FROM orders_temp GROUP BY all columns HAVING COUNT(*)>1;
+ERROR:  column "columns" does not exist
+LINE 1: SELECT *,COUNT(*) FROM orders_temp GROUP BY all columns HAVI...
+                                                        ^
+moptra_ecommerce=# SELECT *,COUNT(*) FROM orders_temp GROUP BY order_id,customer_id,order_status,order_purchase_timestamp,order_approved_at,order_delivered_carrier_date,order_delivered_customer_date,order_estimated_delivery_date HAVING COUNT(*)>1;
+ order_id | customer_id | order_status | order_purchase_timestamp | order_approved_at | order_delivered_carrier_date | order_delivered_customer_date | order_estimated_delivery_date | count
+----------+-------------+--------------+--------------------------+-------------------+------------------------------+-------------------------------+-------------------------------+-------
+(0 rows)
+
+
+moptra_ecommerce=# SELECT * FROM orders_temp WHERE order_id IS NULL OR customer_id IS NULL OR order_status IS NULL OR order_purchase_timestamp IS NULL OR order_approved_at IS NULL OR order_delivered_carrier_date IS NULL OR order_delivered_customer_date IS NULL OR order_estimated_delivery_date IS NULL;
+             order_id             |           customer_id            | order_status | order_purchase_timestamp |  order_approved_at  | order_delivered_carrier_date | order_delivered_customer_date | order_estimated_delivery_date
+----------------------------------+----------------------------------+--------------+--------------------------+---------------------+------------------------------+-------------------------------+-------------------------------
+ 136cce7faa42fdb2cefd53fdc79a6098 | ed0271e0b7da060a393796590e7b737a | invoiced     | 2017-04-11 12:22:08      | 2017-04-13 13:25:17 |                              |                               | 2017-05-09 00:00:00
+ ee64d42b8cf066f35eac1cf57de1aa85 | caded193e8e47b8362864762a83db3c5 | shipped      | 2018-06-04 16:44:48      | 2018-06-05 04:31:18 | 2018-06-05 14:32:00          |                               | 2018-06-28 00:00:00
+ 0760a852e4e9d89eb77bf631eaaf1c84 | d2a79636084590b7465af8ab374a8cf5 | invoiced     | 2018-08-03 17:44:42      | 2018-08-07 06:15:14 |                              |                               | 2018-08-21 00:00:00
+ 15bed8e2fec7fdbadb186b57c46c92f2 | f3f0e613e0bdb9c7cee75504f0f90679 | processing   | 2017-09-03 14:22:03      | 2017-09-03 14:30:09 |                              |                               | 2017-10-03 00:00:00
+ 6942b8da583c2f9957e990d028607019 | 52006a9383bf149a4fb24226b173106f | shipped      | 2018-01-10 11:33:07      | 2018-01-11 02:32:30 | 2018-01-11 19:39:23          |                               | 2018-02-07 00:00:00
+ 36530871a5e80138db53bcfd8a104d90 | 4dafe3c841d2d6cc8a8b6d25b35704b9 | shipped      | 2017-05-09 11:48:37      | 2017-05-11 11:45:14 | 2017-05-11 13:21:47          |                               | 2017-06-08 00:00:00
+ 4d630f57194f5aba1a3d12ce23e71cd9 | 6d491c9fe2f04f6e2af6ec033cd8907c | shipped      | 2017-11-17 19:53:21      | 2017-11-18 19:50:31 | 2017-11-22 17:28:34          |                               | 2017-12-13 00:00:00
+ 8e24261a7e58791d10cb1bf9da94df5c | 64a254d30eed42cd0e6c36dddb88adf0 | unavailable  | 2017-11-16 15:09:28      | 2017-11-16 15:26:57 |                              |                               | 2017-12-05 00:00:00
+ 3b4ad687e7e5190db827e1ae5a8989dd | 1a87b8517b7d31373b50396eb15cb445 | shipped      | 2018-06-28 12:52:15      | 2018-06-28 13:11:09 | 2018-07-04 15:20:00          |                               | 2018-08-03 00:00:00
+ b68d69564a79dea4776afa33d1d2fcab | de1e5517fb50896bbdcff5814fb31802 | shipped      | 2018-02-28 08:57:03      | 2018-02-28 10:40:35 | 2018-03-05 16:10:13          |                               | 2018-03-23 00:00:00
+ d3c8851a6651eeff2f73b0e011ac45d0 | 957f8e082185574de25992dc659ebbc0 | processing   | 2016-10-05 22:44:13      | 2016-10-06 15:51:05 |                              |                               | 2016-12-09 00:00:00
+ f373335aac9a659de916f7170b8bc07a | f06a94a401e52fb019c72f2e8bbf6a2f | shipped      | 2018-03-17 15:32:31      | 2018-03-17 15:48:40 | 2018-03-20 21:08:28          |                               | 2018-04-13 00:00:00
+ 5869074071e0f56e9085dc3742c97b2a | 7203eb38fea2b4a15dd6c39575314aa4 | shipped      | 2018-06-08 20:06:48      | 2018-06-12 04:35:37 | 2018-06-12 14:09:00          |                               | 2018-06-28 00:00:00
+ 1b9ecfe83cdc259250e1a8aca174f0ad | 6d6b50b66d79f80827b6d96751528d30 | canceled     | 2018-08-04 14:29:27      | 2018-08-07 04:10:26 |                              |                               | 2018-08-14 00:00:00
+ 6147a4d49752afd35a119d794e481588 | 938698ae953596e231326da5ff220f68 | shipped      | 2017-04-25 13:35:09      | 2017-04-25 13:45:16 | 2017-05-02 15:29:33          |                               | 2017-05-29 00:00:00
+ 95e42e6aaf6264cd3e77c06b32dc3003 | 29ef1f160ce630146dafa02052e2c5bf | shipped      | 2017-11-24 09:23:33      | 2017-11-24 10:51:26 | 2017-11-24 19:07:43          |                               | 2017-12-08 00:00:00
+ 38b7efdf33dd5561f4f5d4f6e07b0414 | 021e84751ba0ead75b6d314a6ead88d9 | invoiced     | 2017-08-01 18:17:41      | 2017-08-01 18:32:30 |                              |                               | 2017-08-28 00:00:00
+ 10918fe4d665fda80034712895c2b92f | e05a24d2c1d2cd3ae0482ecc1b4d069f | shipped      | 2017-06-26 07:04:39      | 2017-06-26 10:32:39 | 2017-07-04 11:27:21          |                               | 2017-08-03 00:00:00
+ f633c884a99eb63866600655356d973e | b6e18008af6aeb4a5ce5574c15ca2b48 | shipped      | 2018-04-04 00:33:47      | 2018-04-04 00:48:50 | 2018-04-05 19:16:46          |                               | 2018-04-25 00:00:00
+ c272bcd21c287498b4883c7512019702 | 9582c5bbecc65eb568e2c1d839b5cba1 | unavailable  | 2018-01-31 11:31:37      | 2018-01-31 14:23:50 |                              |                               | 2018-02-16 00:00:00
+ 714fb133a6730ab81fa1d3c1b2007291 | e3fe72696c4713d64d3c10afe71e75ed | canceled     | 2018-01-26 21:34:08      | 2018-01-26 21:58:39 | 2018-01-29 22:33:25          |                               | 2018-02-22 00:00:00
+ 37553832a3a89c9b2db59701c357ca67 | 7607cd563696c27ede287e515812d528 | unavailable  | 2017-08-14 17:38:02      | 2017-08-17 00:15:18 |                              |                               | 2017-09-05 00:00:00
+ 662823ed689412b9a2e5085620e06070 | b4214b2e14c916724d94efe51fcbd1f0 | shipped      | 2018-03-15 15:57:24      | 2018-03-15 16:11:07 | 2018-03-19 20:28:42          |                               | 2018-04-05 00:00:00
+ d57e15fb07fd180f06ab3926b39edcd2 | 470b93b3f1cde85550fc74cd3a476c78 | unavailable  | 2018-01-08 19:39:03      | 2018-01-09 07:26:08 |                              |                               | 2018-02-06 00:00:00
+ 6a6c7d523fd59eb5bbefc007331af717 | d954782ec6c0e911292c8a80757ef28d | processing   | 2017-11-24 20:09:33      | 2017-11-24 23:15:15 |                              |                               | 2017-12-20 00:00:00
+ c5e1ff5a434a0e128ac186bd92c1060d | 9408366cfabe249cc4e4680dffb79c5c | shipped      | 2018-03-10 13:39:36      | 2018-03-10 13:50:29 | 2018-03-21 19:18:22          |                               | 2018-04-06 00:00:00
+ 3a129877493c8189c59c60eb71d97c29 | 0913cdce793684e52bbfac69d87e91fd | canceled     | 2018-01-25 13:34:24      | 2018-01-25 13:50:20 | 2018-01-26 21:42:18          |                               | 2018-02-23 00:00:00
+ 00b1cb0320190ca0daa2c88b35206009 | 3532ba38a3fd242259a514ac2b6ae6b6 | canceled     | 2018-08-28 15:26:39      |                     |                              |                               | 2018-09-12 00:00:00
+ 2f634e2cebf8c0283e7ef0989f77d217 | 7353b0fb8e8d9675e3a704c60ca44ebe | unavailable  | 2017-09-27 20:55:33      | 2017-09-28 01:32:50 |                              |                               | 2017-10-27 00:00:00
+ c4abf2eb2ea936ee6fc6e630b152fb77 | d7314e9d240737da330e0f83ac4bd257 | shipped      | 2017-03-09 20:50:46      | 2017-03-09 20:50:46 | 2017-03-14 10:01:57          |                               | 2017-04-03 00:00:00
+ 745e1d4a7f8c4b548881788d4113bb1d | 7198d7088442e4ddfe553353d8ddc957 | processing   | 2017-11-17 06:34:36      | 2017-11-18 02:15:40 |                              |                               | 2017-12-12 00:00:00
+ 504ec2b6f69e898c557955750272d563 | ba0a799b8a7b0b1a1ac522a0a8839bff | shipped      | 2018-05-07 21:43:48      | 2018-05-07 21:54:31 | 2018-05-08 14:17:00          |                               | 2018-05-21 00:00:00
+ ed1407b1e486fadba3e6cd4460dccd56 | d83913dc23a7f3c90ff7a10d1b4bd4c6 | shipped      | 2017-10-22 12:55:42      | 2017-10-22 13:14:28 | 2017-10-24 11:46:06          |                               | 2017-11-14 00:00:00
+ dd94f2867bcd2be2229f44d7a0df4e5b | 786ee3fc4d3b8097f9759d512efb5540 | shipped      | 2017-03-28 09:43:17      | 2017-03-29 02:10:56 | 2017-03-29 15:20:18          |                               | 2017-04-17 00:00:00
+ 362cc20bf09835f4398cedd319fb7d8e | 9eb0d8ae0777405811966250213e28a2 | shipped      | 2018-03-27 12:10:05      | 2018-03-29 03:28:46 | 2018-04-04 19:08:37          |                               | 2018-04-19 00:00:00
+ f05b87cae9d521c780bc3dfc281ca892 | 1a7edcadd05cd374c32cc5e4f87d9832 | shipped      | 2018-08-04 12:49:06      | 2018-08-05 12:45:15 | 2018-08-06 11:55:00          |                               | 2018-08-24 00:00:00
+ 1d52ba7197c7acebbb4f826f6585536f | c9c7fe860d602373a9e93f8bfe9d877a | processing   | 2017-02-13 18:32:55      | 2017-02-13 18:43:55 |                              |                               | 2017-04-04 00:00:00
+ ad27779fb29796c8d798f29aefedf3d0 | aceb1218ab19cb199ebe711d613f9fae | shipped      | 2018-04-05 11:39:33      | 2018-04-05 11:55:21 | 2018-04-05 21:32:19          |                               | 2018-04-27 00:00:00
+ 38d6205cb4508e8d63dcbae0aac1fe96 | d0ca4d9e8fa6fca510ed593effc04df5 | shipped      | 2018-05-02 09:02:58      | 2018-05-03 03:55:26 | 2018-05-03 14:18:00          |                               | 2018-05-25 00:00:00
+ ee0db22a8e742b752914016708470ec8 | aae50600d30bf2efe013ca4c1754ded7 | unavailable  | 2017-08-24 11:04:41      | 2017-08-24 11:15:11 |                              |                               | 2017-09-18 00:00:00
+ d815bd2c2bdd79e4c0e0263caa986d66 | 04d7d73089b39d83f81b829cbd98e43d | processing   | 2017-03-15 10:30:17      | 2017-03-15 10:30:17 |                              |                               | 2017-04-13 00:00:00
+ 52b828f13e08788433adad4a7d135779 | 3c9a7cf7435eb8c2afd717c62809b521 | processing   | 2018-05-05 22:32:38      | 2018-05-05 22:53:19 |                              |                               | 2018-06-01 00:00:00
+ 56ab0ef6726f49b711b84ce62e305c7c | 5a643f32f961a09e6046bad513aa588b | processing   | 2017-11-21 17:54:26      | 2017-11-22 17:59:31 |                              |                               | 2017-12-13 00:00:00
+ 9a01e11eb3e82a6d9e7bd3f3acafa7ca | 49206e681a7405da8d06cf16883575ff | shipped      | 2018-03-02 22:07:38      | 2018-03-03 15:35:24 | 2018-03-06 00:04:29          |                               | 2018-04-02 00:00:00
+ 1488ee1c0dc7439e64d5df80ae9f6089 | 42396af504e7592889a5e54951ce2cb8 | shipped      | 2018-03-16 17:44:05      | 2018-03-16 17:55:36 | 2018-03-22 20:33:27          |                               | 2018-04-13 00:00:00
+ ed3efbd3a87bea76c2812c66a0b32219 | 191984a8ba4cbb2145acb4fe35b69664 | canceled     | 2018-09-20 13:54:16      |                     |                              |                               | 2018-10-17 00:00:00
+ 0966b61e30c4a07edbd7523f59b3f3e4 | 2fcc597b8934d99715dbfff7909dd27f | canceled     | 2018-05-22 18:50:55      | 2018-05-22 19:17:15 |                              |                               | 2018-07-03 00:00:00
+ 9021cf1919f615a121410790dcce848f | 7acf55df0298e1d2c31200fb4f6fb93b | canceled     | 2018-07-04 16:05:56      | 2018-07-06 02:55:16 |                              |                               | 2018-08-22 00:00:00
+ 6ad57aecbae806a7e9cc2cdb6b380711 | d31dbd02ac052d662285f678f8994326 | unavailable  | 2017-11-30 07:48:24      | 2017-11-30 08:14:42 |                              |                               | 2017-12-29 00:00:00
+ 51b0dccc8596ce37a930dff2d63a10a2 | 31bf1057b00f14804278590bbac18b1b | invoiced     | 2017-05-05 22:34:48      | 2017-05-05 22:45:12 |                              |                               | 2017-06-06 00:00:00
+ df8282afe61008dc26c6c31011474d02 | aa797b187b5466bc6925aaaa4bb3bed1 | canceled     | 2017-03-04 12:14:30      |                     |                              |                               | 2017-04-10 00:00:00
+ df6340ee228a1f029c6341931763f177 | 32705597278e6504c324f9c7fe5d74c9 | shipped      | 2017-12-01 21:55:25      | 2017-12-02 10:18:29 | 2017-12-04 21:52:21          |                               | 2017-12-27 00:00:00
+ 8d994041d6127d2acc8d13aad557e75f | 79549bf1ee85aa08fa9007af4f4a6dde | shipped      | 2017-03-24 21:48:54      | 2017-03-24 22:02:26 | 2017-03-25 09:33:55          |                               | 2017-04-19 00:00:00
+ a39d3db795a5cf4c8b6c9dd050f0d326 | ec66df2cb66dfda07c03050470e21f69 | canceled     | 2017-03-13 16:12:24      | 2017-03-13 16:12:24 |                              |                               | 2017-03-30 00:00:00
+ 8d4c637f1accf7a88a4555f02741e606 | b1dd715db389a2077f43174e7a675d07 | canceled     | 2018-08-29 16:27:49      |                     |                              |                               | 2018-09-13 00:00:00
+ a3d1ef2562cf71542edfed06c1a7b6c8 | 5f825bf617f8288a4cb4f50c3c179794 | shipped      | 2017-01-21 11:43:35      | 2017-01-24 03:42:07 | 2017-01-24 10:16:53          |                               | 2017-03-08 00:00:00
+ 5504eaa5a86eb25fa666cf2e6b96c701 | a30be38e1ed0ffb39b318bf1d15e98d9 | invoiced     | 2017-11-29 08:33:06      | 2017-11-29 08:56:23 |                              |                               | 2017-12-20 00:00:00
+ 4ea3508e2de6e58640c0efe3ef758829 | 75776b1f1b023dd82d5fafe940616c1e | processing   | 2017-05-21 23:42:14      | 2017-05-22 00:35:23 |                              |                               | 2017-06-21 00:00:00
+ 9f3458f0433d4cfa472f4682654b8d49 | 99ebfafde8b9e58fd12db9d5cc83132f | unavailable  | 2017-07-18 23:36:55      | 2017-07-18 23:50:17 |                              |                               | 2017-08-09 00:00:00
+ 7a9d4c7f9b068337875b95465330f2fc | 7f71ae48074c0cfec9195f88fcbfac55 | canceled     | 2017-05-01 16:12:39      |                     |                              |                               | 2017-05-30 00:00:00
+ 375f80ffc05feb35ce2680f1fa490575 | 8f6e5911262a8742393596bee2c09eac | canceled     | 2017-06-13 21:10:05      | 2017-06-13 21:22:35 |                              |                               | 2017-07-06 00:00:00
+ 533e104c4193cf07d264603f7800fb71 | 2f95fc8f86679d432d77e9d0316fac48 | processing   | 2017-02-06 15:33:57      | 2017-02-06 15:42:27 |                              |                               | 2017-03-03 00:00:00
+ 6bfa92d3952f762df12752e4937cd63e | 6ccb997c97b0734228b454ba220ed00e | canceled     | 2018-04-27 21:28:24      | 2018-04-27 21:52:18 |                              |                               | 2018-05-10 00:00:00
+ f0df036e9be21fc238f131bbfcdde769 | 1fa16395beca89233661543954ca6cf1 | unavailable  | 2017-02-24 23:39:21      | 2017-02-24 23:45:14 |                              |                               | 2017-04-07 00:00:00
+ 195070d2d0eb1da7d93b958bce36d1ef | 827d7240a35889668129a7b10aa0081b | shipped      | 2017-02-08 05:56:31      | 2017-02-10 03:03:30 | 2017-02-15 09:14:40          |                               | 2017-03-10 00:00:00
+ 86f0bcd9b426a2c1022ae317c7f27be6 | dd24965dd5aa551df36ce4baf180445b | unavailable  | 2017-03-08 15:13:03      | 2017-03-08 15:13:03 |                              |                               | 2017-03-29 00:00:00
+ 7785b07bcf7b5bf8fbf50e491382d98e | edf36208c4d022a97bb82b7c02553af2 | shipped      | 2018-04-17 20:31:30      | 2018-04-17 20:51:47 | 2018-04-19 00:51:15          |                               | 2018-05-04 00:00:00
+ ee1c259624feb697ba9a84a268f77cfa | 1d877053716a2f3be7e0c13096eb75f1 | shipped      | 2018-02-22 19:22:04      | 2018-02-22 19:35:26 | 2018-02-23 20:47:18          |                               | 2018-03-19 00:00:00
+ 027b013d2186e25c2b82beb3679d0833 | 752b19f57cd013e2bf4e3c62da5a29e5 | shipped      | 2018-04-11 15:49:16      | 2018-04-11 16:10:51 | 2018-04-13 20:05:02          |                               | 2018-05-02 00:00:00
+ 02ea547b6d2ee25305588fd50df58b46 | ff4545a3148f5a22667f301e00cb5ad7 | shipped      | 2017-03-23 22:03:43      | 2017-03-23 22:10:24 | 2017-03-28 11:43:01          |                               | 2017-04-18 00:00:00
+ 62076e9aa47cedb799ddc84812264c9e | 37e066fcd483b5b73efc8eb2166c91e2 | shipped      | 2018-06-09 19:28:03      | 2018-06-09 19:50:51 | 2018-06-11 13:50:00          |                               | 2018-07-04 00:00:00
+ c3a6dc9afef5794ea4a867b5a18e0ad1 | 0c305f688ce08dc9402a2164fd6f29d6 | invoiced     | 2017-11-25 14:10:20      | 2017-11-25 17:32:57 |                              |                               | 2017-12-19 00:00:00
+ 98fe01bc254b759c1f2c11d77c2891d5 | 30f3b26a06e5a67682305298f83e6be3 | unavailable  | 2017-10-17 18:34:56      | 2017-10-18 18:37:08 |                              |                               | 2017-11-24 00:00:00
+ 2eb5ba20812f78127f6243fa27fb40e5 | d5420a7dc4c5c1f95b7912368419f59f | canceled     | 2017-05-29 18:10:06      | 2017-05-31 07:02:46 |                              |                               | 2017-06-20 00:00:00
+ f56dc9034c3962e36d49fb73baa12800 | 5c4795c07c0bd317adaf7406327bbfa9 | unavailable  | 2017-08-10 22:20:51      | 2017-08-12 02:09:15 |                              |                               | 2017-09-14 00:00:00
+ 914e3f7135c8d9046278a046552ebb6e | 078bfceb258f6ee262174cbf251aa763 | shipped      | 2017-04-11 12:22:13      | 2017-04-13 02:42:05 | 2017-04-13 15:56:24          |                               | 2017-05-16 00:00:00
+ 880835c91a5227560bdb8d0f45c60579 | 410a24845e470f3c52bb78f084d359b5 | processing   | 2017-03-08 09:10:55      | 2017-03-09 03:33:21 |                              |                               | 2017-04-04 00:00:00
+ 566c5bff1142c9d6003a83fd2e8ad1e5 | 892022d497c9598ce4a313f64ceaa87e | invoiced     | 2017-11-23 18:03:23      | 2017-11-23 18:25:18 |                              |                               | 2017-12-18 00:00:00
+ 369423839b4d9789d69665b7c2361443 | fd09581178029df57e2c1f177fc8ef29 | processing   | 2017-11-10 08:56:32      | 2017-11-11 03:10:33 |                              |                               | 2017-12-05 00:00:00
+ 0130f0f71fb0e831d18e6a3b33a3a50c | e56f6dff7b8ac9813ddeb2312f0d834f | unavailable  | 2017-05-12 10:17:23      | 2017-05-13 03:10:13 |                              |                               | 2017-05-22 00:00:00
+ 2d1e2d5bf4dc7227b3bfebb81328c15f | ec05a6d8558c6455f0cbbd8a420ad34f | delivered    | 2017-11-28 17:44:07      | 2017-11-28 17:56:40 | 2017-11-30 18:12:23          |                               | 2017-12-18 00:00:00
+ 83a9c18344682fcbc57696019ff1ff2a | 96ca69bfa1a8b97847ced6f03bed4e79 | shipped      | 2017-08-11 17:40:19      | 2017-08-11 17:55:23 | 2017-08-14 18:22:53          |                               | 2017-09-13 00:00:00
+ ddaec6fff982b13e7e048b627a11d6da | 68f4ad79cc0c2ad06e19088f5c00e9fa | canceled     | 2016-10-04 19:41:32      |                     |                              |                               | 2016-11-16 00:00:00
+ 84b8ba39037606b7b30a39d02e9e4154 | 7c2bf05f6902368e5d21040b68c2bbdb | unavailable  | 2018-06-27 19:51:02      | 2018-06-27 20:11:41 |                              |                               | 2018-07-12 00:00:00
+ 5290c34bd38a8a095b885f13958db1e1 | 92af427e290117f39d9ff908566072e0 | canceled     | 2018-08-21 10:25:18      |                     |                              |                               | 2018-09-06 00:00:00
+ b4c9f083bce61caf47fb38f9ba058bce | 6ce60503e530d8a67926e9b8e3fdb635 | invoiced     | 2017-08-05 16:00:56      | 2017-08-05 16:15:16 |                              |                               | 2017-08-30 00:00:00
+ db4d39113d1f1f359709384518d81e31 | 91aed284ce3e18b2be4cb2dafc798b51 | processing   | 2017-09-19 11:08:41      | 2017-09-19 11:34:08 |                              |                               | 2017-10-10 00:00:00
+moptra_ecommerce=# \x
+Expanded display is on.
+moptra_ecommerce=# SELECT * FROM orders_temp WHERE order_id IS NULL OR customer_id IS NULL OR order_status IS NULL OR order_purchase_timestamp IS NULL OR order_approved_at IS NULL OR order_delivered_carrier_date IS NULL OR order_delivered_customer_date IS NULL OR order_estimated_delivery_date IS NULL;
+-[ RECORD 1 ]-----------------+---------------------------------
+order_id                      | 136cce7faa42fdb2cefd53fdc79a6098
+customer_id                   | ed0271e0b7da060a393796590e7b737a
+order_status                  | invoiced
+order_purchase_timestamp      | 2017-04-11 12:22:08
+order_approved_at             | 2017-04-13 13:25:17
+order_delivered_carrier_date  |
+order_delivered_customer_date |
+order_estimated_delivery_date | 2017-05-09 00:00:00
+-[ RECORD 2 ]-----------------+---------------------------------
+order_id                      | ee64d42b8cf066f35eac1cf57de1aa85
+customer_id                   | caded193e8e47b8362864762a83db3c5
+order_status                  | shipped
+order_purchase_timestamp      | 2018-06-04 16:44:48
+order_approved_at             | 2018-06-05 04:31:18
+order_delivered_carrier_date  | 2018-06-05 14:32:00
+order_delivered_customer_date |
+order_estimated_delivery_date | 2018-06-28 00:00:00
+-[ RECORD 3 ]-----------------+---------------------------------
+order_id                      | 0760a852e4e9d89eb77bf631eaaf1c84
+customer_id                   | d2a79636084590b7465af8ab374a8cf5
+order_status                  | invoiced
+order_purchase_timestamp      | 2018-08-03 17:44:42
+order_approved_at             | 2018-08-07 06:15:14
+order_delivered_carrier_date  |
+order_delivered_customer_date |
+order_estimated_delivery_date | 2018-08-21 00:00:00
+-[ RECORD 4 ]-----------------+---------------------------------
+order_id                      | 15bed8e2fec7fdbadb186b57c46c92f2
+customer_id                   | f3f0e613e0bdb9c7cee75504f0f90679
+order_status                  | processing
+order_purchase_timestamp      | 2017-09-03 14:22:03
+order_approved_at             | 2017-09-03 14:30:09
+order_delivered_carrier_date  |
+order_delivered_customer_date |
+order_estimated_delivery_date | 2017-10-03 00:00:00
+-[ RECORD 5 ]-----------------+---------------------------------
+order_id                      | 6942b8da583c2f9957e990d028607019
+customer_id                   | 52006a9383bf149a4fb24226b173106f
+order_status                  | shipped
+order_purchase_timestamp      | 2018-01-10 11:33:07
+order_approved_at             | 2018-01-11 02:32:30
+order_delivered_carrier_date  | 2018-01-11 19:39:23
+moptra_ecommerce=# \x
+Expanded display is off.
+moptra_ecommerce=# CREATE TABLE olist_orders AS SELECT * FROM orders_temp;
+SELECT 99441
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           |          |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+
+
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ALTER COLUMN order_id VARCHAR(100) PRIMARY KEY;
+ERROR:  syntax error at or near "VARCHAR"
+LINE 2: ALTER COLUMN order_id VARCHAR(100) PRIMARY KEY;
+                              ^
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD PRIMARY KEY(order_id);
+ALTER TABLE
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+
+
+moptra_ecommerce=# SELECT * FROM olist_orders LIMIT 5;
+             order_id             |           customer_id            | order_status | order_purchase_timestamp |  order_approved_at  | order_delivered_carrier_date | order_delivered_customer_date | order_estimated_delivery_date
+----------------------------------+----------------------------------+--------------+--------------------------+---------------------+------------------------------+-------------------------------+-------------------------------
+ e481f51cbdc54678b7cc49136f2d6af7 | 9ef432eb6251297304e76186b10a928d | delivered    | 2017-10-02 10:56:33      | 2017-10-02 11:07:15 | 2017-10-04 19:55:00          | 2017-10-10 21:25:13           | 2017-10-18 00:00:00
+ 53cdb2fc8bc7dce0b6741e2150273451 | b0830fb4747a6c6d20dea0b8c802d7ef | delivered    | 2018-07-24 20:41:37      | 2018-07-26 03:24:27 | 2018-07-26 14:31:00          | 2018-08-07 15:27:45           | 2018-08-13 00:00:00
+ 47770eb9100c2d0c44946d9cf07ec65d | 41ce2a54c0b03bf3443c3d931a367089 | delivered    | 2018-08-08 08:38:49      | 2018-08-08 08:55:23 | 2018-08-08 13:50:00          | 2018-08-17 18:06:29           | 2018-09-04 00:00:00
+ 949d5b44dbf5de918fe9c16f97b45f8a | f88197465ea7920adcdbec7375364d82 | delivered    | 2017-11-18 19:28:06      | 2017-11-18 19:45:59 | 2017-11-22 13:39:59          | 2017-12-02 00:28:42           | 2017-12-15 00:00:00
+ ad21c59c0840e6cb83a9ceb5573f8159 | 8ab97904e6daea8866dbdbc4fb7aad2c | delivered    | 2018-02-13 21:18:39      | 2018-02-13 22:20:29 | 2018-02-14 19:46:34          | 2018-02-16 18:17:02           | 2018-02-26 00:00:00
+(5 rows)
+
+
+moptra_ecommerce=# \x
+Expanded display is on.
+moptra_ecommerce=# SELECT * FROM olist_orders LIMIT 5;
+-[ RECORD 1 ]-----------------+---------------------------------
+order_id                      | e481f51cbdc54678b7cc49136f2d6af7
+customer_id                   | 9ef432eb6251297304e76186b10a928d
+order_status                  | delivered
+order_purchase_timestamp      | 2017-10-02 10:56:33
+order_approved_at             | 2017-10-02 11:07:15
+order_delivered_carrier_date  | 2017-10-04 19:55:00
+order_delivered_customer_date | 2017-10-10 21:25:13
+order_estimated_delivery_date | 2017-10-18 00:00:00
+-[ RECORD 2 ]-----------------+---------------------------------
+order_id                      | 53cdb2fc8bc7dce0b6741e2150273451
+customer_id                   | b0830fb4747a6c6d20dea0b8c802d7ef
+order_status                  | delivered
+order_purchase_timestamp      | 2018-07-24 20:41:37
+order_approved_at             | 2018-07-26 03:24:27
+order_delivered_carrier_date  | 2018-07-26 14:31:00
+order_delivered_customer_date | 2018-08-07 15:27:45
+order_estimated_delivery_date | 2018-08-13 00:00:00
+-[ RECORD 3 ]-----------------+---------------------------------
+order_id                      | 47770eb9100c2d0c44946d9cf07ec65d
+customer_id                   | 41ce2a54c0b03bf3443c3d931a367089
+order_status                  | delivered
+order_purchase_timestamp      | 2018-08-08 08:38:49
+order_approved_at             | 2018-08-08 08:55:23
+order_delivered_carrier_date  | 2018-08-08 13:50:00
+order_delivered_customer_date | 2018-08-17 18:06:29
+order_estimated_delivery_date | 2018-09-04 00:00:00
+-[ RECORD 4 ]-----------------+---------------------------------
+order_id                      | 949d5b44dbf5de918fe9c16f97b45f8a
+customer_id                   | f88197465ea7920adcdbec7375364d82
+order_status                  | delivered
+order_purchase_timestamp      | 2017-11-18 19:28:06
+order_approved_at             | 2017-11-18 19:45:59
+order_delivered_carrier_date  | 2017-11-22 13:39:59
+order_delivered_customer_date | 2017-12-02 00:28:42
+order_estimated_delivery_date | 2017-12-15 00:00:00
+-[ RECORD 5 ]-----------------+---------------------------------
+order_id                      | ad21c59c0840e6cb83a9ceb5573f8159
+customer_id                   | 8ab97904e6daea8866dbdbc4fb7aad2c
+order_status                  | delivered
+order_purchase_timestamp      | 2018-02-13 21:18:39
+order_approved_at             | 2018-02-13 22:20:29
+order_delivered_carrier_date  | 2018-02-14 19:46:34
+moptra_ecommerce=# DROP TABLE orders_temp;
+DROP TABLE
+moptra_ecommerce=# commit;
+WARNING:  there is no transaction in progress
+COMMIT
+
+---------------------------------------------------------------------------------------------
+moptra_ecommerce=# CREATE TABLE olist_order_items(order_id VARCHAR(100) PRIMARY KEY REFERENCES olist_orders(order_id),order_item_id INTEGER,product_id VARCHAR(100),seller_id VARCHAR(100),shipping_limit_date TIMESTAMP,price NUMERIC(8,2),freight_value NUMERIC(6,2));
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_order_items FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_order_items_dataset.csv' DELIMITER ',' CSV HEADER;
+ERROR:  duplicate key value violates unique constraint "olist_order_items_pkey"
+DETAIL:  Key (order_id)=(0008288aa423d2a3f00fcb17cd7d8719) already exists.
+CONTEXT:  COPY olist_order_items, line 16
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# q
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near "q"
+LINE 2: q
+        ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ALTER COLUMN order_id VARCHAR(100);
+ERROR:  syntax error at or near "VARCHAR"
+LINE 2: ALTER COLUMN order_id VARCHAR(100);
+                              ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# DROP PRIMARY KEY(order_id);
+ERROR:  syntax error at or near "PRIMARY"
+LINE 2: DROP PRIMARY KEY(order_id);
+             ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# DROP CONSTRAINT PRIMARY KEY(order_id);
+ERROR:  syntax error at or near "PRIMARY"
+LINE 2: DROP CONSTRAINT PRIMARY KEY(order_id);
+                        ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# DROP CONSTRAINT olist_order_items_pkey;
+ALTER TABLE
+moptra_ecommerce=# \COPY olist_order_items FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_order_items_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 112650
+moptra_ecommerce=# \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | olist_order_items | table | postgres
+ public | olist_orders      | table | postgres
+(2 rows)
+
+
+moptra_ecommerce=# \d olist_order_items;
+                          Table "public.olist_order_items"
+       Column        |            Type             | Collation | Nullable | Default
+---------------------+-----------------------------+-----------+----------+---------
+ order_id            | character varying(100)      |           | not null |
+ order_item_id       | integer                     |           |          |
+ product_id          | character varying(100)      |           |          |
+ seller_id           | character varying(100)      |           |          |
+ shipping_limit_date | timestamp without time zone |           |          |
+ price               | numeric(8,2)                |           |          |
+ freight_value       | numeric(6,2)                |           |          |
+Foreign-key constraints:
+    "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# ALTER olist_order_items
+moptra_ecommerce-# ADD PRIMARY KEY(order_id,order_item_id);
+ERROR:  syntax error at or near "olist_order_items"
+LINE 1: ALTER olist_order_items
+              ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD PRIMARY KEY(order_id,order_item_id);
+ALTER TABLE
+moptra_ecommerce=# CREATE TABLE olist_customers(customer_id VARCHAR(100) PRIMARY KEY,customer_unique_id VARCHAR(100),customer_zip_code_prefix INTEGER,customer_city VARCHAR(50),customer_state CHAR(2));
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_order_items FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_customers_dataset.csv' DELIMITER ',' CSV HEADER;
+ERROR:  invalid input syntax for type integer: "861eff4711a542e4b93843c6dd7febb0"
+CONTEXT:  COPY olist_order_items, line 2, column order_item_id: "861eff4711a542e4b93843c6dd7febb0"
+moptra_ecommerce=# \COPY olist_customers FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_customers_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 99441
+moptra_ecommerce=# \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | olist_customers   | table | postgres
+ public | olist_order_items | table | postgres
+ public | olist_orders      | table | postgres
+(3 rows)
+
+
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD FOREIGN KEY(customer_id) REFERENCES olist_customers(customer_id);
+ALTER TABLE
+moptra_ecommerce=# \d olist_customers
+                           Table "public.olist_customers"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           | not null |
+ customer_unique_id       | character varying(100) |           |          |
+ customer_zip_code_prefix | integer                |           |          |
+ customer_city            | character varying(50)  |           |          |
+ customer_state           | character(2)           |           |          |
+Indexes:
+    "olist_customers_pkey" PRIMARY KEY, btree (customer_id)
+Referenced by:
+    TABLE "olist_orders" CONSTRAINT "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+
+
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+Foreign-key constraints:
+    "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | olist_customers   | table | postgres
+ public | olist_order_items | table | postgres
+ public | olist_orders      | table | postgres
+(3 rows)
+
+
+moptra_ecommerce=# CREATE TABLE olist_sellers(seller_id
+moptra_ecommerce(# VARCHAR(100) PRIMARY KEY,seller_zip_code_prefix INTEGER,seller_city VARCHAR(50),seller_state CHAR(2),FOREIGN KEY(seller_id) REFERENCES olist_order_items(seller_id));
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_order_items"
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD UNIQUE(seller_id);
+ERROR:  could not create unique index "olist_order_items_seller_id_key"
+DETAIL:  Key (seller_id)=(dbc22125167c298ef99da25668e1011f) is duplicated.
+moptra_ecommerce=# CREATE TABLE olist_sellers(seller_id VARCHAR(100) PRIMARY KEY,seller_zip_code_prefix INTEGER,seller_city VARCHAR(50),seller_state CHAR(2));
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_sellers FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_sellers_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 3095
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(seller_id) REFERENCES olist_sellers(seller_id);
+ALTER TABLE
+moptra_ecommerce=# \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | olist_customers   | table | postgres
+ public | olist_order_items | table | postgres
+ public | olist_orders      | table | postgres
+ public | olist_sellers     | table | postgres
+(4 rows)
+
+
+
+
+
+
+
+
+
+
+postgres=# \c moptra_ecommerce;
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# CREATE TABLE olist_geolocation(geolocation_lat DOUBLE PRECISION,geolocation_lng DOUBLE PRECISION,geolocation_city VARCHAR(50),geolocation_state CHAR(2));
+CREATE TABLE
+moptra_ecommerce=# drop table olist_geolocation;
+DROP TABLE
+moptra_ecommerce=# CREATE TABLE olist_geolocation(geolocation_zip_code_prefix INTEGER,geolocation_lat DOUBLE PRECISION,geolocation_lng DOUBLE PRECISION,geolocation_city VARCHAR(50),geolocation_state CHAR(2));
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_geolocation FROM 'C:/Users/Ruthveek/OneDrive/Documents/Projects/Moptra Infotech - ECommerce Database Management/.csv files/olist_geolocation_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 1000163
+moptra_ecommerce=# \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | olist_customers   | table | postgres
+ public | olist_geolocation | table | postgres
+ public | olist_order_items | table | postgres
+ public | olist_orders      | table | postgres
+ public | olist_sellers     | table | postgres
+(5 rows)
+
+
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ADD FOREIGN KEY(customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix);
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_geolocation"
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-#  ADD FOREIGN KEY(geolocation_zip_code_prefix) REFERENCES olist_customers(customer_zip_code_prefix);
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_customers"
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ADD PRIMARY KEY(geolocation_zip_code_prefix);
+ERROR:  could not create unique index "olist_geolocation_pkey"
+DETAIL:  Key (geolocation_zip_code_prefix)=(32310) is duplicated.
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ADD PRIMARY KEY(geolocation_zip_code_prefix,geolocation_lat,geolocation_lng);
+ERROR:  could not create unique index "olist_geolocation_pkey"
+DETAIL:  Key (geolocation_zip_code_prefix, geolocation_lat, geolocation_lng)=(4363, -23.64579722, -46.66589294) is duplicated.
+moptra_ecommerce=# SELECT geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, COUNT(*) FROM olist_geolocation GROUP BY geolocation_zip_code_prefix, geolocation_lat, geolocation_lng HAVING COUNT(*)>1;
+
+postgres=# \c moptra_ecommerce
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# \d olist_geolocation
+                           Table "public.olist_geolocation"
+           Column            |         Type          | Collation | Nullable | Default
+-----------------------------+-----------------------+-----------+----------+---------
+ geolocation_zip_code_prefix | integer               |           |          |
+ geolocation_lat             | double precision      |           |          |
+ geolocation_lng             | double precision      |           |          |
+ geolocation_city            | character varying(50) |           |          |
+ geolocation_state           | character(2)          |           |          |
+
+
+moptra_ecommerce=# CREATE TEMP TABLE temp_table AS
+moptra_ecommerce-# SELECT DISTINCT ON (geolocation_zip_code_prefix) *
+moptra_ecommerce-# FROM olist_geolocation
+moptra_ecommerce-# ORDER BY geolocation_zip_code_prefix,geolocation_lat,geolocation_lng DESC;
+SELECT 19015
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_geolocation;
+  count
+---------
+ 1000163
+(1 row)
+
+
+moptra_ecommerce=# TRUNCATE olist_geolocation;
+TRUNCATE TABLE
+moptra_ecommerce=# INSERT INTO olist_geolocation SELECT * FROM temp_table;
+INSERT 0 19015
+moptra_ecommerce=# \dt
+                List of relations
+  Schema   |       Name        | Type  |  Owner
+-----------+-------------------+-------+----------
+ pg_temp_5 | temp_table        | table | postgres
+ public    | olist_customers   | table | postgres
+ public    | olist_geolocation | table | postgres
+ public    | olist_order_items | table | postgres
+ public    | olist_orders      | table | postgres
+ public    | olist_sellers     | table | postgres
+(6 rows)
+
+
+moptra_ecommerce=# \c olist_sellers
+connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "olist_sellers" does not exist
+Previous connection kept
+moptra_ecommerce=# \d olist_sellers
+                           Table "public.olist_sellers"
+         Column         |          Type          | Collation | Nullable | Default
+------------------------+------------------------+-----------+----------+---------
+ seller_id              | character varying(100) |           | not null |
+ seller_zip_code_prefix | integer                |           |          |
+ seller_city            | character varying(50)  |           |          |
+ seller_state           | character(2)           |           |          |
+Indexes:
+    "olist_sellers_pkey" PRIMARY KEY, btree (seller_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ADD PRIMARY KEY(geolocation_zip_code_prefix);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_sellers
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near ";"
+LINE 2: ;
+        ^
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ADD FOREIGN KEY(customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix);
+ERROR:  insert or update on table "olist_customers" violates foreign key constraint "olist_customers_customer_zip_code_prefix_fkey"
+DETAIL:  Key (customer_zip_code_prefix)=(72300) is not present in table "olist_geolocation".
+moptra_ecommerce=# SELECT DISTINCT customer_zip_code_prefix
+moptra_ecommerce-# FROM olist_customers
+moptra_ecommerce-# WHERE customer_zip_code_prefix NOT IN (
+moptra_ecommerce(#     SELECT geolocation_zip_code_prefix
+moptra_ecommerce(#     FROM olist_geolocation
+moptra_ecommerce(# );
+ customer_zip_code_prefix
+--------------------------
+                    67105
+                    62625
+                    42716
+                    58734
+                    71590
+                    17390
+                    72549
+                    29718
+                    64605
+                    70316
+                    72427
+                    65137
+                    65830
+                    35242
+                    28575
+                    64047
+                    38627
+                    29949
+                    28160
+                    75784
+                    95572
+                    11547
+                    55027
+                     7430
+                    59299
+                     8342
+                    37005
+                    73402
+                    72268
+                    71574
+moptra_ecommerce=#
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ADD FOREIGN KEY(geolocation_zip_code_prefix) REFERENCES olist_customers(customer_zip_code_prefix);
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_customers"
+
+postgres=# \c moptra_ecommerce
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers WHERE customer_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+ count
+-------
+   278
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers;
+ count
+-------
+ 99441
+(1 row)
+
+
+moptra_ecommerce=# DELETE FROM olist_customers WHERE customer_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+ERROR:  update or delete on table "olist_customers" violates foreign key constraint "olist_orders_customer_id_fkey" on table "olist_orders"
+DETAIL:  Key (customer_id)=(ecb1725b26e8b8c458181455dfa434ea) is still referenced from table "olist_orders".
+moptra_ecommerce=# DO $$
+moptra_ecommerce$# DECLARE
+moptra_ecommerce$#     r RECORD;
+moptra_ecommerce$# BEGIN
+moptra_ecommerce$#     FOR r IN (
+moptra_ecommerce$#         SELECT conname, conrelid::regclass
+moptra_ecommerce$#         FROM pg_constraint
+moptra_ecommerce$#         WHERE contype = 'f'
+moptra_ecommerce$#     ) LOOP
+moptra_ecommerce$#         EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I;', r.conrelid, r.conname);
+moptra_ecommerce$#     END LOOP;
+moptra_ecommerce$# END $$;
+DO
+moptra_ecommerce=#
+moptra_ecommerce=# DELETE FROM olist_customers WHERE customer_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+DELETE 278
+moptra_ecommerce=#
+moptra_ecommerce=# \dt olist_sellers
+             List of relations
+ Schema |     Name      | Type  |  Owner
+--------+---------------+-------+----------
+ public | olist_sellers | table | postgres
+(1 row)
+
+
+moptra_ecommerce=# \d olist_sellers
+                           Table "public.olist_sellers"
+         Column         |          Type          | Collation | Nullable | Default
+------------------------+------------------------+-----------+----------+---------
+ seller_id              | character varying(100) |           | not null |
+ seller_zip_code_prefix | integer                |           |          |
+ seller_city            | character varying(50)  |           |          |
+ seller_state           | character(2)           |           |          |
+Indexes:
+    "olist_sellers_pkey" PRIMARY KEY, btree (seller_id)
+
+
+moptra_ecommerce=# select count(*) from olist_sellers where seller_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+ count
+-------
+     7
+(1 row)
+
+
+moptra_ecommerce=# DELETE FROM olist_sellers from olist_sellers where seller_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+ERROR:  syntax error at or near "from"
+LINE 1: DELETE FROM olist_sellers from olist_sellers where seller_zi...
+                                  ^
+moptra_ecommerce=# DELETE FROM olist_sellers where seller_zip_code_prefix NOT IN(SELECT geolocation_zip_code_prefix FROM olist_geolocation);
+DELETE 7
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(order_id) REFERENCES olist_orders(order_id)
+moptra_ecommerce-# ;
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD FOREIGN KEY(customer_id) REFERENCES olist_customers(customer_id);
+ERROR:  insert or update on table "olist_orders" violates foreign key constraint "olist_orders_customer_id_fkey"
+DETAIL:  Key (customer_id)=(19bacb562bd43bd4eaf05b6c0a59dad0) is not present in table "olist_customers".
+moptra_ecommerce=# DO $$
+moptra_ecommerce$# DECLARE
+moptra_ecommerce$#     r RECORD;
+moptra_ecommerce$# BEGIN
+moptra_ecommerce$#     FOR r IN (
+moptra_ecommerce$#         SELECT conname, conrelid::regclass
+moptra_ecommerce$#         FROM pg_constraint
+moptra_ecommerce$#         WHERE contype = 'f'
+moptra_ecommerce$#     ) LOOP
+moptra_ecommerce$#         EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I;', r.conrelid, r.conname);
+moptra_ecommerce$#     END LOOP;
+moptra_ecommerce$# END $$;
+DO
+moptra_ecommerce=# CREATE TABLE olist_order_payments(order_id VARCHAR(100),payment_sequential INTEGER,payment_type VARCHAR(25),payment_installments INTEGER,payment_value
+moptra_ecommerce(# REAL);
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_order_payments FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_order_payments_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 103886
+moptra_ecommerce=# ALTER TABLE olist_order_payments
+moptra_ecommerce-# ADD PRIMARY KEY(order_id);
+ERROR:  could not create unique index "olist_order_payments_pkey"
+DETAIL:  Key (order_id)=(05aac5a18dcd77932007f57de8650622) is duplicated.
+moptra_ecommerce=# ALTER TABLE olist_order_payments
+moptra_ecommerce-# ADD PRIMARY KEY(order_id,payment_sequential);
+ALTER TABLE
+
+postgres=# \c moptra_ecommerce
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# CREATE TABLE olist_order_reviews(review_id VARCHAR(200),order_id VARCHAR(100),review_score INTEGER,review_comment_title VARCHAR(100),review_comment_message VARCHAR(300),review_creation_date TIMESTAMP,review_answer_timestamp TIMESTAMP);
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_order_reviews 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_order_reviews_dataset_utf8.csv' DELIMITER ',' CSV HEADER;
+\copy: parse error at "'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra"
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_order_reviews_dataset_utf8.csv' DELIMITER ',' CSV HEADER;
+ERROR:  missing data for column "review_comment_title"
+CONTEXT:  COPY olist_order_reviews, line 2: ""7bc2406110b926393aa56f80a40eba40,""73fc7af87114b39712e6da79b0a377eb"",4,,,2018-01-18 00:00:00,2018-..."
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\book1.csv' DELIMITER ',' CSV HEADER;
+ERROR:  value too long for type character varying(200)
+CONTEXT:  COPY olist_order_reviews, line 2, column review_id: "8670d52e15e00043ae7de4c01cc2fe06,"b9bf720beb4ab3728760088589c62129",4,recomendo,aparelho eficiente. ..."
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x8f in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 340
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x8f in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 340
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_u.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 619
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  value too long for type character varying(300)
+CONTEXT:  COPY olist_order_reviews, line 12511, column review_comment_message: "Amo comprar nessa conceituada empresa...spr recebi antes do prazo estimado...
+Todos os produtos de ..."
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ALTER COLUMN review_comment_message TYPE VARCHAR(500);
+ALTER TABLE
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  value too long for type character varying(500)
+CONTEXT:  COPY olist_order_reviews, line 12511, column review_comment_message: "Amo comprar nessa conceituada empresa...spr recebi antes do prazo estimado...
+Todos os produtos de ..."
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ALTER COLUMN review_comment_message TYPE VARCHAR(1000);
+ALTER TABLE
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 37093
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 44408
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 45540
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 52573
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 55210
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 74943
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+ERROR:  character with byte sequence 0x9d in encoding "WIN1252" has no equivalent in encoding "UTF8"
+CONTEXT:  COPY olist_order_reviews, line 100004
+moptra_ecommerce=# \COPY olist_order_reviews FROM 'C:\\Users\\Ruthveek\\Downloads\\olist_order_reviews_dataset_utf8_cleaned.csv' DELIMITER ',' CSV HEADER;
+COPY 99224
+moptra_ecommerce=# \dt olist_order_reviews
+                List of relations
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | olist_order_reviews | table | postgres
+(1 row)
+
+
+moptra_ecommerce=# \d olist_order_reviews
+                           Table "public.olist_order_reviews"
+         Column          |            Type             | Collation | Nullable | Default
+-------------------------+-----------------------------+-----------+----------+---------
+ review_id               | character varying(200)      |           |          |
+ order_id                | character varying(100)      |           |          |
+ review_score            | integer                     |           |          |
+ review_comment_title    | character varying(100)      |           |          |
+ review_comment_message  | character varying(1000)     |           |          |
+ review_creation_date    | timestamp without time zone |           |          |
+ review_answer_timestamp | timestamp without time zone |           |          |
+
+
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD PRIMARY KEY(review_id);
+ERROR:  could not create unique index "olist_order_reviews_pkey"
+DETAIL:  Key (review_id)=(da8e936bc2f1b52ec626f8aa41f3df44) is duplicated.
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD PRIMARY KEY(order_id);
+ERROR:  could not create unique index "olist_order_reviews_pkey"
+DETAIL:  Key (order_id)=(f014aa85d8f495d824d120e9035faacb) is duplicated.
+moptra_ecommerce=# \dt
+                List of relations
+ Schema |         Name         | Type  |  Owner
+--------+----------------------+-------+----------
+ public | olist_customers      | table | postgres
+ public | olist_geolocation    | table | postgres
+ public | olist_order_items    | table | postgres
+ public | olist_order_payments | table | postgres
+ public | olist_order_reviews  | table | postgres
+ public | olist_orders         | table | postgres
+ public | olist_sellers        | table | postgres
+(7 rows)
+postgres=# CREATE TABLE olist_products(product_id VARCHAR(100),product_category_name VARCHAR(100),product_name_length INTEGER,product_description_length INTEGER,product_photos_qty INTEGER,product_weight_g INTEGER,product_length_cm INTEGER,product_height_cm INTEGER,product_width_cm INTEGER);
+CREATE TABLE
+postgres=# \COPY olist_products FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_products_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 32951
+postgres=# ALTER TABLE olist_products
+postgres-# ADD PRIMARY KEY(product_id);
+ALTER TABLE
+postgres=# \dt
+                List of relations
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | olist_order_reviews | table | postgres
+ public | olist_products      | table | postgres
+(2 rows)
+
+
+postgres=# \c moptra_ecommerce
+You are now connected to database "moptra_ecommerce" as user "postgres".
+moptra_ecommerce=# CREATE TABLE olist_products(product_id VARCHAR(100),product_category_name VARCHAR(100),product_name_length INTEGER,product_description_length INTEGER,product_photos_qty INTEGER,product_weight_g INTEGER,product_length_cm INTEGER,product_height_cm INTEGER,product_width_cm INTEGER);
+CREATE TABLE
+moptra_ecommerce=# \COPY olist_products FROM 'C:\\Users\\Ruthveek\\OneDrive\\Documents\\Projects\\Moptra Infotech - ECommerce Database Management\\.csv files\\olist_products_dataset.csv' DELIMITER ',' CSV HEADER;
+COPY 32951
+moptra_ecommerce=# ALTER TABLE olist_products
+moptra_ecommerce-# ADD PRIMARY KEY(product_id);
+ALTER TABLE
+moptra_ecommerce=# \dt
+                List of relations
+ Schema |         Name         | Type  |  Owner
+--------+----------------------+-------+----------
+ public | olist_customers      | table | postgres
+ public | olist_geolocation    | table | postgres
+ public | olist_order_items    | table | postgres
+ public | olist_order_payments | table | postgres
+ public | olist_order_reviews  | table | postgres
+ public | olist_orders         | table | postgres
+ public | olist_products       | table | postgres
+ public | olist_sellers        | table | postgres
+(8 rows)
+
+
+moptra_ecommerce=# \d olist_customers
+                           Table "public.olist_customers"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           | not null |
+ customer_unique_id       | character varying(100) |           |          |
+ customer_zip_code_prefix | integer                |           |          |
+ customer_city            | character varying(50)  |           |          |
+ customer_state           | character(2)           |           |          |
+Indexes:
+    "olist_customers_pkey" PRIMARY KEY, btree (customer_id)
+
+
+moptra_ecommerce=# \d olist_geolocation
+                           Table "public.olist_geolocation"
+           Column            |         Type          | Collation | Nullable | Default
+-----------------------------+-----------------------+-----------+----------+---------
+ geolocation_zip_code_prefix | integer               |           | not null |
+ geolocation_lat             | double precision      |           |          |
+ geolocation_lng             | double precision      |           |          |
+ geolocation_city            | character varying(50) |           |          |
+ geolocation_state           | character(2)          |           |          |
+Indexes:
+    "olist_geolocation_pkey" PRIMARY KEY, btree (geolocation_zip_code_prefix)
+
+
+moptra_ecommerce=# \d olist_order_items
+                          Table "public.olist_order_items"
+       Column        |            Type             | Collation | Nullable | Default
+---------------------+-----------------------------+-----------+----------+---------
+ order_id            | character varying(100)      |           | not null |
+ order_item_id       | integer                     |           | not null |
+ product_id          | character varying(100)      |           |          |
+ seller_id           | character varying(100)      |           |          |
+ shipping_limit_date | timestamp without time zone |           |          |
+ price               | numeric(8,2)                |           |          |
+ freight_value       | numeric(6,2)                |           |          |
+Indexes:
+    "olist_order_items_pkey" PRIMARY KEY, btree (order_id, order_item_id)
+
+
+moptra_ecommerce=# \d olist_order_payments
+                      Table "public.olist_order_payments"
+        Column        |          Type          | Collation | Nullable | Default
+----------------------+------------------------+-----------+----------+---------
+ order_id             | character varying(100) |           | not null |
+ payment_sequential   | integer                |           | not null |
+ payment_type         | character varying(25)  |           |          |
+ payment_installments | integer                |           |          |
+ payment_value        | real                   |           |          |
+Indexes:
+    "olist_order_payments_pkey" PRIMARY KEY, btree (order_id, payment_sequential)
+
+
+moptra_ecommerce=# \d olist_order_reviews
+                           Table "public.olist_order_reviews"
+         Column          |            Type             | Collation | Nullable | Default
+-------------------------+-----------------------------+-----------+----------+---------
+ review_id               | character varying(200)      |           |          |
+ order_id                | character varying(100)      |           |          |
+ review_score            | integer                     |           |          |
+ review_comment_title    | character varying(100)      |           |          |
+ review_comment_message  | character varying(1000)     |           |          |
+ review_creation_date    | timestamp without time zone |           |          |
+ review_answer_timestamp | timestamp without time zone |           |          |
+
+
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+
+
+moptra_ecommerce=# \d olist_products
+                            Table "public.olist_products"
+           Column           |          Type          | Collation | Nullable | Default
+----------------------------+------------------------+-----------+----------+---------
+ product_id                 | character varying(100) |           | not null |
+ product_category_name      | character varying(100) |           |          |
+ product_name_length        | integer                |           |          |
+ product_description_length | integer                |           |          |
+ product_photos_qty         | integer                |           |          |
+ product_weight_g           | integer                |           |          |
+ product_length_cm          | integer                |           |          |
+ product_height_cm          | integer                |           |          |
+ product_width_cm           | integer                |           |          |
+Indexes:
+    "olist_products_pkey" PRIMARY KEY, btree (product_id)
+
+
+moptra_ecommerce=# \d olist_sellers
+                           Table "public.olist_sellers"
+         Column         |          Type          | Collation | Nullable | Default
+------------------------+------------------------+-----------+----------+---------
+ seller_id              | character varying(100) |           | not null |
+ seller_zip_code_prefix | integer                |           |          |
+ seller_city            | character varying(50)  |           |          |
+ seller_state           | character(2)           |           |          |
+Indexes:
+    "olist_sellers_pkey" PRIMARY KEY, btree (seller_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD FOREIGN KEY(order_id) REFERENCES olist_orders(order_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD PRIMARY KEY(review_id);
+ERROR:  could not create unique index "olist_order_reviews_pkey"
+DETAIL:  Key (review_id)=(da8e936bc2f1b52ec626f8aa41f3df44) is duplicated.
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD PRIMARY KEY(order_id);
+ERROR:  could not create unique index "olist_order_reviews_pkey"
+DETAIL:  Key (order_id)=(f014aa85d8f495d824d120e9035faacb) is duplicated.
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ADD PRIMARY KEY(review_id,order_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_order_payments
+moptra_ecommerce-# ADD FOREIGN KEY(order_id) REFERENCES olist_orders(order_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_products
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near ";"
+LINE 2: ;
+        ^
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(product_id) REFERENCES olist_products(product_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ADD FOREIGN KEY(geolocation_zip_code_prefix) REFERENCES olist_customers(customer_zip_code_prefix);
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_customers"
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ADD FOREIGN KEY(customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_sellers
+moptra_ecommerce-#  ADD FOREIGN KEY(seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(seller_id) REFERENCES olist_sellers(seller_id);
+ERROR:  insert or update on table "olist_order_items" violates foreign key constraint "olist_order_items_seller_id_fkey"
+DETAIL:  Key (seller_id)=(2e90cb1677d35cfe24eef47d441b7c87) is not present in table "olist_sellers".
+moptra_ecommerce=# DELETE FROM olist_order_items WHERE seller_id NOT IN(SELECT seller_id FROM olist_sellers);
+DELETE 253
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(seller_id) REFERENCES olist_sellers(seller_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_sellers
+moptra_ecommerce-# ADD UNIQUE(seller_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near ";"
+LINE 2: ;
+        ^
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD FOREIGN KEY(order_id) REFERENCES olist_order_items(order_id);
+ERROR:  there is no unique constraint matching given keys for referenced table "olist_order_items"
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ADD FOREIGN KEY(order_id) REFERENCES olist_orders(order_id);
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ;
+ERROR:  syntax error at or near ";"
+LINE 2: ;
+        ^
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD FOREIGN KEY(customer_id) REFERENCES olist_customers(customer_id);
+ERROR:  insert or update on table "olist_orders" violates foreign key constraint "olist_orders_customer_id_fkey"
+DETAIL:  Key (customer_id)=(19bacb562bd43bd4eaf05b6c0a59dad0) is not present in table "olist_customers".
+moptra_ecommerce=# DELETE FROM olist_customers WHERE customer_id NOT IN(SELECT customer_id FROM olist_orders);
+DELETE 0
+moptra_ecommerce=# DELETE FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers);
+ERROR:  update or delete on table "olist_orders" violates foreign key constraint "olist_order_reviews_order_id_fkey" on table "olist_order_reviews"
+DETAIL:  Key (order_id)=(690199d6a2c51ff57c6b392d7680cbfd) is still referenced from table "olist_order_reviews".
+moptra_ecommerce=# DELETE FROM olist_order_reviews WHERE order_id IN(SELECT order_id FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers);
+moptra_ecommerce(# ;
+moptra_ecommerce(# q
+moptra_ecommerce(# gtvybvyu
+moptra_ecommerce(# ;
+moptra_ecommerce(# ;
+moptra_ecommerce(# ;
+moptra_ecommerce(# );
+ERROR:  syntax error at or near ";"
+LINE 1: ...customer_id NOT IN(SELECT customer_id FROM olist_customers);
+                                                                      ^
+moptra_ecommerce=# DELETE FROM olist_order_reviews WHERE order_id IN(SELECT order_id FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers));
+DELETE 279
+moptra_ecommerce=# DELETE FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers);
+ERROR:  update or delete on table "olist_orders" violates foreign key constraint "olist_order_payments_order_id_fkey" on table "olist_order_payments"
+DETAIL:  Key (order_id)=(690199d6a2c51ff57c6b392d7680cbfd) is still referenced from table "olist_order_payments".
+moptra_ecommerce=# DELETE FROM olist_order_paymentsWHERE order_id IN(SELECT order_id FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers));
+ERROR:  syntax error at or near "IN"
+LINE 1: DELETE FROM olist_order_paymentsWHERE order_id IN(SELECT ord...
+                                                       ^
+moptra_ecommerce=# DELETE FROM olist_order_payments WHERE order_id IN(SELECT order_id FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers));
+DELETE 287
+moptra_ecommerce=# DELETE FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers);
+ERROR:  update or delete on table "olist_orders" violates foreign key constraint "olist_order_items_order_id_fkey" on table "olist_order_items"
+DETAIL:  Key (order_id)=(690199d6a2c51ff57c6b392d7680cbfd) is still referenced from table "olist_order_items".
+moptra_ecommerce=# DELETE FROM olist_order_items WHERE order_id IN(SELECT order_id FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers));
+DELETE 301
+moptra_ecommerce=# DELETE FROM olist_orders WHERE customer_id NOT IN(SELECT customer_id FROM olist_customers);
+DELETE 278
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ADD FOREIGN KEY(customer_id) REFERENCES olist_customers(customer_id);
+ALTER TABLE
+moptra_ecommerce=# \dt
+                List of relations
+ Schema |         Name         | Type  |  Owner
+--------+----------------------+-------+----------
+ public | olist_customers      | table | postgres
+ public | olist_geolocation    | table | postgres
+ public | olist_order_items    | table | postgres
+ public | olist_order_payments | table | postgres
+ public | olist_order_reviews  | table | postgres
+ public | olist_orders         | table | postgres
+ public | olist_products       | table | postgres
+ public | olist_sellers        | table | postgres
+(8 rows)
+
+
+moptra_ecommerce=# \d olist_customers
+                           Table "public.olist_customers"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           | not null |
+ customer_unique_id       | character varying(100) |           |          |
+ customer_zip_code_prefix | integer                |           |          |
+ customer_city            | character varying(50)  |           |          |
+ customer_state           | character(2)           |           |          |
+Indexes:
+    "olist_customers_pkey" PRIMARY KEY, btree (customer_id)
+Foreign-key constraints:
+    "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_orders" CONSTRAINT "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+
+
+moptra_ecommerce=# \d olist_geolocation
+                           Table "public.olist_geolocation"
+           Column            |         Type          | Collation | Nullable | Default
+-----------------------------+-----------------------+-----------+----------+---------
+ geolocation_zip_code_prefix | integer               |           | not null |
+ geolocation_lat             | double precision      |           |          |
+ geolocation_lng             | double precision      |           |          |
+ geolocation_city            | character varying(50) |           |          |
+ geolocation_state           | character(2)          |           |          |
+Indexes:
+    "olist_geolocation_pkey" PRIMARY KEY, btree (geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_customers" CONSTRAINT "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+    TABLE "olist_sellers" CONSTRAINT "olist_sellers_seller_zip_code_prefix_fkey" FOREIGN KEY (seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+
+
+moptra_ecommerce=# \d olist_order_items
+                          Table "public.olist_order_items"
+       Column        |            Type             | Collation | Nullable | Default
+---------------------+-----------------------------+-----------+----------+---------
+ order_id            | character varying(100)      |           | not null |
+ order_item_id       | integer                     |           | not null |
+ product_id          | character varying(100)      |           |          |
+ seller_id           | character varying(100)      |           |          |
+ shipping_limit_date | timestamp without time zone |           |          |
+ price               | numeric(8,2)                |           |          |
+ freight_value       | numeric(6,2)                |           |          |
+Indexes:
+    "olist_order_items_pkey" PRIMARY KEY, btree (order_id, order_item_id)
+Foreign-key constraints:
+    "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+    "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
+
+
+moptra_ecommerce=# \d olist_order_payments
+                      Table "public.olist_order_payments"
+        Column        |          Type          | Collation | Nullable | Default
+----------------------+------------------------+-----------+----------+---------
+ order_id             | character varying(100) |           | not null |
+ payment_sequential   | integer                |           | not null |
+ payment_type         | character varying(25)  |           |          |
+ payment_installments | integer                |           |          |
+ payment_value        | real                   |           |          |
+Indexes:
+    "olist_order_payments_pkey" PRIMARY KEY, btree (order_id, payment_sequential)
+Foreign-key constraints:
+    "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# \d olist_order_reviews
+                           Table "public.olist_order_reviews"
+         Column          |            Type             | Collation | Nullable | Default
+-------------------------+-----------------------------+-----------+----------+---------
+ review_id               | character varying(200)      |           | not null |
+ order_id                | character varying(100)      |           | not null |
+ review_score            | integer                     |           |          |
+ review_comment_title    | character varying(100)      |           |          |
+ review_comment_message  | character varying(1000)     |           |          |
+ review_creation_date    | timestamp without time zone |           |          |
+ review_answer_timestamp | timestamp without time zone |           |          |
+Indexes:
+    "olist_order_reviews_pkey" PRIMARY KEY, btree (review_id, order_id)
+Foreign-key constraints:
+    "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+Foreign-key constraints:
+    "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_payments" CONSTRAINT "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_reviews" CONSTRAINT "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# \d olist_products
+                            Table "public.olist_products"
+           Column           |          Type          | Collation | Nullable | Default
+----------------------------+------------------------+-----------+----------+---------
+ product_id                 | character varying(100) |           | not null |
+ product_category_name      | character varying(100) |           |          |
+ product_name_length        | integer                |           |          |
+ product_description_length | integer                |           |          |
+ product_photos_qty         | integer                |           |          |
+ product_weight_g           | integer                |           |          |
+ product_length_cm          | integer                |           |          |
+ product_height_cm          | integer                |           |          |
+ product_width_cm           | integer                |           |          |
+Indexes:
+    "olist_products_pkey" PRIMARY KEY, btree (product_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+
+
+moptra_ecommerce=# \d olist_sellers
+                           Table "public.olist_sellers"
+         Column         |          Type          | Collation | Nullable | Default
+------------------------+------------------------+-----------+----------+---------
+ seller_id              | character varying(100) |           | not null |
+ seller_zip_code_prefix | integer                |           |          |
+ seller_city            | character varying(50)  |           |          |
+ seller_state           | character(2)           |           |          |
+Indexes:
+    "olist_sellers_pkey" PRIMARY KEY, btree (seller_id)
+    "olist_sellers_seller_id_key" UNIQUE CONSTRAINT, btree (seller_id)
+Foreign-key constraints:
+    "olist_sellers_seller_zip_code_prefix_fkey" FOREIGN KEY (seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ADD UNIQUE(customer_unique_id);
+ERROR:  could not create unique index "olist_customers_customer_unique_id_key"
+DETAIL:  Key (customer_unique_id)=(8dc4412f2ddf5ffee6cf50e6278b37fd) is duplicated.
+
+moptra_ecommerce=# \dt
+                List of relations
+ Schema |         Name         | Type  |  Owner
+--------+----------------------+-------+----------
+ public | olist_customers      | table | postgres
+ public | olist_geolocation    | table | postgres
+ public | olist_order_items    | table | postgres
+ public | olist_order_payments | table | postgres
+ public | olist_order_reviews  | table | postgres
+ public | olist_orders         | table | postgres
+ public | olist_products       | table | postgres
+ public | olist_sellers        | table | postgres
+(8 rows)
+
+
+moptra_ecommerce=# \d olist_customers
+                           Table "public.olist_customers"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           | not null |
+ customer_unique_id       | character varying(100) |           |          |
+ customer_zip_code_prefix | integer                |           |          |
+ customer_city            | character varying(50)  |           |          |
+ customer_state           | character(2)           |           |          |
+Indexes:
+    "olist_customers_pkey" PRIMARY KEY, btree (customer_id)
+Foreign-key constraints:
+    "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_orders" CONSTRAINT "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+
+                             ^
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers WHERE customer_unique_id IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers WHERE customer_zip_code_prefix IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers WHERE customer_city IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_customers WHERE customer_state IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# ALTER TABLE olist_customers
+moptra_ecommerce-# ALTER COLUMN customer_unique_id SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN customer_zip_code_prefix SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN customer_city SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN customer_state SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_geolocation
+                           Table "public.olist_geolocation"
+           Column            |         Type          | Collation | Nullable | Default
+-----------------------------+-----------------------+-----------+----------+---------
+ geolocation_zip_code_prefix | integer               |           | not null |
+ geolocation_lat             | double precision      |           |          |
+ geolocation_lng             | double precision      |           |          |
+ geolocation_city            | character varying(50) |           |          |
+ geolocation_state           | character(2)          |           |          |
+Indexes:
+    "olist_geolocation_pkey" PRIMARY KEY, btree (geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_customers" CONSTRAINT "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+    TABLE "olist_sellers" CONSTRAINT "olist_sellers_seller_zip_code_prefix_fkey" FOREIGN KEY (seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+
+
+moptra_ecommerce=# ALTER TABLE olist_geolocation
+moptra_ecommerce-# ALTER COLUMN geolocation_lat SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN geolocation_lng SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN geolocation_city SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN geolocation_state SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_order_items
+                          Table "public.olist_order_items"
+       Column        |            Type             | Collation | Nullable | Default
+---------------------+-----------------------------+-----------+----------+---------
+ order_id            | character varying(100)      |           | not null |
+ order_item_id       | integer                     |           | not null |
+ product_id          | character varying(100)      |           |          |
+ seller_id           | character varying(100)      |           |          |
+ shipping_limit_date | timestamp without time zone |           |          |
+ price               | numeric(8,2)                |           |          |
+ freight_value       | numeric(6,2)                |           |          |
+Indexes:
+    "olist_order_items_pkey" PRIMARY KEY, btree (order_id, order_item_id)
+Foreign-key constraints:
+    "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+    "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_order_items
+moptra_ecommerce-# ALTER COLUMN product_id SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN seller_id SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN shipping_limit_date SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN price SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN freight_value SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_order_payments
+                      Table "public.olist_order_payments"
+        Column        |          Type          | Collation | Nullable | Default
+----------------------+------------------------+-----------+----------+---------
+ order_id             | character varying(100) |           | not null |
+ payment_sequential   | integer                |           | not null |
+ payment_type         | character varying(25)  |           |          |
+ payment_installments | integer                |           |          |
+ payment_value        | real                   |           |          |
+Indexes:
+    "olist_order_payments_pkey" PRIMARY KEY, btree (order_id, payment_sequential)
+Foreign-key constraints:
+    "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_order_payments
+moptra_ecommerce-# ALTER COLUMN payment_type SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN payment_installments SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN payment_value SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_order_reviews
+                           Table "public.olist_order_reviews"
+         Column          |            Type             | Collation | Nullable | Default
+-------------------------+-----------------------------+-----------+----------+---------
+ review_id               | character varying(200)      |           | not null |
+ order_id                | character varying(100)      |           | not null |
+ review_score            | integer                     |           |          |
+ review_comment_title    | character varying(100)      |           |          |
+ review_comment_message  | character varying(1000)     |           |          |
+ review_creation_date    | timestamp without time zone |           |          |
+ review_answer_timestamp | timestamp without time zone |           |          |
+Indexes:
+    "olist_order_reviews_pkey" PRIMARY KEY, btree (review_id, order_id)
+Foreign-key constraints:
+    "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_order_reviews WHERE review_score IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_order_reviews WHERE review_creation_date IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_order_reviews WHERE review_answer_timestamp IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# ALTER TABLE olist_order_reviews
+moptra_ecommerce-# ALTER COLUMN review_score SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN review_creation_date SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN review_answer_timestamp SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           |          |
+ order_status                  | character varying(20)       |           |          |
+ order_purchase_timestamp      | timestamp without time zone |           |          |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+Foreign-key constraints:
+    "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_payments" CONSTRAINT "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_reviews" CONSTRAINT "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_orders WHERE order_status IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_orders WHERE order_purchase_timestamp IS NULL;
+ count
+-------
+     0
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_orders WHERE order_approved_at IS NULL;
+ count
+-------
+   159
+(1 row)
+
+
+moptra_ecommerce=# ALTER TABLE olist_orders
+moptra_ecommerce-# ALTER COLUMN customer_id SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN order_status SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN order_purchase_timestamp SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \d olist_products
+                            Table "public.olist_products"
+           Column           |          Type          | Collation | Nullable | Default
+----------------------------+------------------------+-----------+----------+---------
+ product_id                 | character varying(100) |           | not null |
+ product_category_name      | character varying(100) |           |          |
+ product_name_length        | integer                |           |          |
+ product_description_length | integer                |           |          |
+ product_photos_qty         | integer                |           |          |
+ product_weight_g           | integer                |           |          |
+ product_length_cm          | integer                |           |          |
+ product_height_cm          | integer                |           |          |
+ product_width_cm           | integer                |           |          |
+Indexes:
+    "olist_products_pkey" PRIMARY KEY, btree (product_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+
+
+moptra_ecommerce=# ALTER TABLE olist_products
+moptra_ecommerce-# ALTER COLUMN product_category_name SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_name_length SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_description_length SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_photos_qty SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_weight_g SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_length_cm SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_height_cm SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_width_cm SET NOT NULL;
+ERROR:  column "product_category_name" of relation "olist_products" contains null values
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_category_name IS NULL;
+ count
+-------
+   610
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_name_length IS NULL;
+ count
+-------
+   610
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_description_length IS NULL;
+ count
+-------
+   610
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_photos_qty IS NULL;
+ count
+-------
+   610
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*)
+moptra_ecommerce-# FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL
+moptra_ecommerce-#   AND product_weight_g IS NULL
+moptra_ecommerce-#   AND product_length_cm IS NULL
+moptra_ecommerce-#   AND product_height_cm IS NULL
+moptra_ecommerce-#   AND product_width_cm IS NULL;
+ count
+-------
+     1
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*)
+moptra_ecommerce-# FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL;
+ count
+-------
+   610
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_weight_g IS NULL;
+ count
+-------
+     2
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_length_cm IS NULL;
+ count
+-------
+     2
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_height_cm IS NULL;
+ count
+-------
+     2
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_width_cm IS NULL;
+ count
+-------
+     2
+(1 row)
+
+
+moptra_ecommerce=# SELECT *
+moptra_ecommerce-# FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL
+moptra_ecommerce-#   AND product_weight_g IS NULL
+moptra_ecommerce-#   AND product_length_cm IS NULL
+moptra_ecommerce-#   AND product_height_cm IS NULL
+moptra_ecommerce-#   AND product_width_cm IS NULL;
+            product_id            | product_category_name | product_name_length | product_description_length | product_photos_qty | product_weight_g | product_length_cm | product_height_cm | product_width_cm
+----------------------------------+-----------------------+---------------------+----------------------------+--------------------+------------------+-------------------+-------------------+------------------
+ 5eb564652db742ff8f28759cd8d2652a |                       |                     |                            |                    |                  |                   |                   |
+(1 row)
+
+
+moptra_ecommerce=# DELETE FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL
+moptra_ecommerce-#   AND product_weight_g IS NULL
+moptra_ecommerce-#   AND product_length_cm IS NULL
+moptra_ecommerce-#   AND product_height_cm IS NULL
+moptra_ecommerce-#   AND product_width_cm IS NULL;
+ERROR:  update or delete on table "olist_products" violates foreign key constraint "olist_order_items_product_id_fkey" on table "olist_order_items"
+DETAIL:  Key (product_id)=(5eb564652db742ff8f28759cd8d2652a) is still referenced from table "olist_order_items".
+moptra_ecommerce=# DELETE FROM olist_order_items
+moptra_ecommerce-# WHERE product_id = '5eb564652db742ff8f28759cd8d2652a';
+DELETE 17
+moptra_ecommerce=# DELETE FROM olist_products
+moptra_ecommerce-# WHERE product_id = '5eb564652db742ff8f28759cd8d2652a';
+DELETE 1
+moptra_ecommerce=# DELETE
+moptra_ecommerce-# FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL;
+ERROR:  update or delete on table "olist_products" violates foreign key constraint "olist_order_items_product_id_fkey" on table "olist_order_items"
+DETAIL:  Key (product_id)=(a41e356c76fab66334f36de622ecbd3a) is still referenced from table "olist_order_items".
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_order_items
+moptra_ecommerce-# WHERE product_id IN (
+moptra_ecommerce(#   SELECT product_id FROM olist_products
+moptra_ecommerce(#   WHERE product_category_name IS NULL
+moptra_ecommerce(#     AND product_name_length IS NULL
+moptra_ecommerce(#     AND product_description_length IS NULL
+moptra_ecommerce(#     AND product_photos_qty IS NULL
+moptra_ecommerce(# );
+ count
+-------
+  1579
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_order_items;
+ count
+--------
+ 112079
+(1 row)
+
+
+moptra_ecommerce=# DELETE FROM olist_order_items
+moptra_ecommerce-# WHERE product_id IN (
+moptra_ecommerce(#   SELECT product_id FROM olist_products
+moptra_ecommerce(#   WHERE product_category_name IS NULL
+moptra_ecommerce(#     AND product_name_length IS NULL
+moptra_ecommerce(#     AND product_description_length IS NULL
+moptra_ecommerce(#     AND product_photos_qty IS NULL
+moptra_ecommerce(# );
+DELETE 1579
+moptra_ecommerce=# DELETE FROM olist_products
+moptra_ecommerce-# WHERE product_category_name IS NULL
+moptra_ecommerce-#   AND product_name_length IS NULL
+moptra_ecommerce-#   AND product_description_length IS NULL
+moptra_ecommerce-#   AND product_photos_qty IS NULL;
+DELETE 609
+moptra_ecommerce=#
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_length_cm IS NULL;
+ count
+-------
+     1
+(1 row)
+
+
+moptra_ecommerce=# SELECT COUNT(*) FROM olist_products WHERE product_length_cm IS NULL
+moptra_ecommerce-# AND product_weight_g IS NULL
+moptra_ecommerce-# AND product_height_cm IS NULL
+moptra_ecommerce-# AND product_width_cm IS NULL;
+ count
+-------
+     1
+(1 row)
+
+
+moptra_ecommerce=# DELETE FROM olist_products WHERE product_length_cm IS NULL
+moptra_ecommerce-# AND product_width_cm IS NULL;
+ERROR:  update or delete on table "olist_products" violates foreign key constraint "olist_order_items_product_id_fkey" on table "olist_order_items"
+DETAIL:  Key (product_id)=(09ff539a621711667c43eba6a3bd8466) is still referenced from table "olist_order_items".
+moptra_ecommerce=#  DELETE FROM olist_order_items WHERE product_id IN(
+moptra_ecommerce(# SELECT product_id FROM olist_products
+moptra_ecommerce(# WHERE product_length_cm IS NULL
+moptra_ecommerce(# AND product_weight_g IS NULL
+moptra_ecommerce(# AND product_height_cm IS NULL
+moptra_ecommerce(# AND product_width_cm IS NULL);
+DELETE 1
+moptra_ecommerce=# DELETE FROM olist_products
+moptra_ecommerce-# WHERE product_length_cm IS NULL
+moptra_ecommerce-# AND product_weight_g IS NULL
+moptra_ecommerce-# AND product_height_cm IS NULL
+moptra_ecommerce-# AND product_width_cm IS NULL;
+DELETE 1
+moptra_ecommerce=# ALTER TABLE olist_products
+moptra_ecommerce-# ALTER COLUMN product_category_name SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_name_length SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_description_length SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_photos_qty SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_weight_g SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_length_cm SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_height_cm SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN product_width_cm SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# ALTER TABLE olist_sellers
+moptra_ecommerce-# ALTER COLUMN seller_zip_code_prefix SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN seller_city SET NOT NULL,
+moptra_ecommerce-# ALTER COLUMN seller_state SET NOT NULL;
+ALTER TABLE
+moptra_ecommerce=# \dt
+                List of relations
+ Schema |         Name         | Type  |  Owner
+--------+----------------------+-------+----------
+ public | olist_customers      | table | postgres
+ public | olist_geolocation    | table | postgres
+ public | olist_order_items    | table | postgres
+ public | olist_order_payments | table | postgres
+ public | olist_order_reviews  | table | postgres
+ public | olist_orders         | table | postgres
+ public | olist_products       | table | postgres
+ public | olist_sellers        | table | postgres
+(8 rows)
+
+
+moptra_ecommerce=# \d olist_customers
+                           Table "public.olist_customers"
+          Column          |          Type          | Collation | Nullable | Default
+--------------------------+------------------------+-----------+----------+---------
+ customer_id              | character varying(100) |           | not null |
+ customer_unique_id       | character varying(100) |           | not null |
+ customer_zip_code_prefix | integer                |           | not null |
+ customer_city            | character varying(50)  |           | not null |
+ customer_state           | character(2)           |           | not null |
+Indexes:
+    "olist_customers_pkey" PRIMARY KEY, btree (customer_id)
+Foreign-key constraints:
+    "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_orders" CONSTRAINT "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+
+
+moptra_ecommerce=# \d olist_geolocation
+                           Table "public.olist_geolocation"
+           Column            |         Type          | Collation | Nullable | Default
+-----------------------------+-----------------------+-----------+----------+---------
+ geolocation_zip_code_prefix | integer               |           | not null |
+ geolocation_lat             | double precision      |           | not null |
+ geolocation_lng             | double precision      |           | not null |
+ geolocation_city            | character varying(50) |           | not null |
+ geolocation_state           | character(2)          |           | not null |
+Indexes:
+    "olist_geolocation_pkey" PRIMARY KEY, btree (geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_customers" CONSTRAINT "olist_customers_customer_zip_code_prefix_fkey" FOREIGN KEY (customer_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+    TABLE "olist_sellers" CONSTRAINT "olist_sellers_seller_zip_code_prefix_fkey" FOREIGN KEY (seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+
+
+moptra_ecommerce=# \d olist_order_items
+                          Table "public.olist_order_items"
+       Column        |            Type             | Collation | Nullable | Default
+---------------------+-----------------------------+-----------+----------+---------
+ order_id            | character varying(100)      |           | not null |
+ order_item_id       | integer                     |           | not null |
+ product_id          | character varying(100)      |           | not null |
+ seller_id           | character varying(100)      |           | not null |
+ shipping_limit_date | timestamp without time zone |           | not null |
+ price               | numeric(8,2)                |           | not null |
+ freight_value       | numeric(6,2)                |           | not null |
+Indexes:
+    "olist_order_items_pkey" PRIMARY KEY, btree (order_id, order_item_id)
+Foreign-key constraints:
+    "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+    "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
+
+
+moptra_ecommerce=# \d olist_order_payments
+                      Table "public.olist_order_payments"
+        Column        |          Type          | Collation | Nullable | Default
+----------------------+------------------------+-----------+----------+---------
+ order_id             | character varying(100) |           | not null |
+ payment_sequential   | integer                |           | not null |
+ payment_type         | character varying(25)  |           | not null |
+ payment_installments | integer                |           | not null |
+ payment_value        | real                   |           | not null |
+Indexes:
+    "olist_order_payments_pkey" PRIMARY KEY, btree (order_id, payment_sequential)
+Foreign-key constraints:
+    "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce=# olist_order_reviews
+moptra_ecommerce-# \d olist_order_reviews
+                           Table "public.olist_order_reviews"
+         Column          |            Type             | Collation | Nullable | Default
+-------------------------+-----------------------------+-----------+----------+---------
+ review_id               | character varying(200)      |           | not null |
+ order_id                | character varying(100)      |           | not null |
+ review_score            | integer                     |           | not null |
+ review_comment_title    | character varying(100)      |           |          |
+ review_comment_message  | character varying(1000)     |           |          |
+ review_creation_date    | timestamp without time zone |           | not null |
+ review_answer_timestamp | timestamp without time zone |           | not null |
+Indexes:
+    "olist_order_reviews_pkey" PRIMARY KEY, btree (review_id, order_id)
+Foreign-key constraints:
+    "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce-# \d olist_orders
+                                 Table "public.olist_orders"
+            Column             |            Type             | Collation | Nullable | Default
+-------------------------------+-----------------------------+-----------+----------+---------
+ order_id                      | character varying(100)      |           | not null |
+ customer_id                   | character varying(100)      |           | not null |
+ order_status                  | character varying(20)       |           | not null |
+ order_purchase_timestamp      | timestamp without time zone |           | not null |
+ order_approved_at             | timestamp without time zone |           |          |
+ order_delivered_carrier_date  | timestamp without time zone |           |          |
+ order_delivered_customer_date | timestamp without time zone |           |          |
+ order_estimated_delivery_date | timestamp without time zone |           |          |
+Indexes:
+    "olist_orders_pkey" PRIMARY KEY, btree (order_id)
+Foreign-key constraints:
+    "olist_orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES olist_customers(customer_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_payments" CONSTRAINT "olist_order_payments_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+    TABLE "olist_order_reviews" CONSTRAINT "olist_order_reviews_order_id_fkey" FOREIGN KEY (order_id) REFERENCES olist_orders(order_id)
+
+
+moptra_ecommerce-# \d olist_products
+                            Table "public.olist_products"
+           Column           |          Type          | Collation | Nullable | Default
+----------------------------+------------------------+-----------+----------+---------
+ product_id                 | character varying(100) |           | not null |
+ product_category_name      | character varying(100) |           | not null |
+ product_name_length        | integer                |           | not null |
+ product_description_length | integer                |           | not null |
+ product_photos_qty         | integer                |           | not null |
+ product_weight_g           | integer                |           | not null |
+ product_length_cm          | integer                |           | not null |
+ product_height_cm          | integer                |           | not null |
+ product_width_cm           | integer                |           | not null |
+Indexes:
+    "olist_products_pkey" PRIMARY KEY, btree (product_id)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_product_id_fkey" FOREIGN KEY (product_id) REFERENCES olist_products(product_id)
+
+
+moptra_ecommerce-# \d olist_sellers
+                           Table "public.olist_sellers"
+         Column         |          Type          | Collation | Nullable | Default
+------------------------+------------------------+-----------+----------+---------
+ seller_id              | character varying(100) |           | not null |
+ seller_zip_code_prefix | integer                |           | not null |
+ seller_city            | character varying(50)  |           | not null |
+ seller_state           | character(2)           |           | not null |
+Indexes:
+    "olist_sellers_pkey" PRIMARY KEY, btree (seller_id)
+    "olist_sellers_seller_id_key" UNIQUE CONSTRAINT, btree (seller_id)
+Foreign-key constraints:
+    "olist_sellers_seller_zip_code_prefix_fkey" FOREIGN KEY (seller_zip_code_prefix) REFERENCES olist_geolocation(geolocation_zip_code_prefix)
+Referenced by:
+    TABLE "olist_order_items" CONSTRAINT "olist_order_items_seller_id_fkey" FOREIGN KEY (seller_id) REFERENCES olist_sellers(seller_id)
