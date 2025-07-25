@@ -35,7 +35,7 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ├── schemas.py / schemas.cpython-313.pyc
 ├── main.py / main.cpython-313.pyc
 └── README.md                      # 📄 This file
-
+```bash
 ---
 ## 📦 Dataset Used
 
@@ -94,7 +94,6 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 
 ### 🔸 1. Install dependencies
 
-```bash
 pip install -r requirements.txt
 
 ### 🔸 2. Run the FastAPI server
