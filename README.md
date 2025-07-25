@@ -34,6 +34,7 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ├── models.py / models.cpython-313.pyc
 ├── schemas.py / schemas.cpython-313.pyc
 ├── main.py / main.cpython-313.pyc
+├── requirements.txt               # Required libraries to be installed
 └── README.md                      # 📄 This file
 ```
 
@@ -97,7 +98,11 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 
 pip install -r requirements.txt
 
-### 🔸 2. Run the FastAPI server
+### 🔸 2. Load the moptra_ecommerce database
+
+Copy the commands listed in moptra_copyable_database_script.txt in your local database (PostgreSQL preferred).
+
+### 🔸 3. Run the FastAPI server
 
 uvicorn main:app --reload
 
