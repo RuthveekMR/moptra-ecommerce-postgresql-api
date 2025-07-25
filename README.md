@@ -37,7 +37,6 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 └── README.md                      # 📄 This file
 
 ---
-
 ## 📦 Dataset Used
 
 - 🟢 **Original Source:**  
@@ -63,20 +62,23 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ## ⚙️ Steps Implemented
 
 ### 🔹 1. Data Cleaning
-- Converted **Latin-1 → UTF-8** using Python
-- Fixed inconsistent city names using **Excel functions** like `UNIQUE()`, `FIND()`, `REPLACE()`, `TRANSLATE()`
+
+- Converted **Latin-1 → UTF-8** using Python  
+- Fixed inconsistent city names using Excel functions like `UNIQUE()`, `FIND()`, `REPLACE()`, `TRANSLATE()`  
 - Skipped full translation of Portuguese reviews due to API quota (will revisit later)
 
 ### 🔹 2. Database Modeling
-- Created **8+ normalized tables** in PostgreSQL
-- Enforced **primary keys**, **foreign keys**, and **constraints** (`NOT NULL`, `UNIQUE`)
+
+- Created **8+ normalized tables** in PostgreSQL  
+- Enforced **primary keys**, **foreign keys**, and **constraints** (`NOT NULL`, `UNIQUE`)  
 - Logged every correction in **`moptra_database.txt`**
 
 ### 🔹 3. RESTful API with FastAPI
-- `models.py` → SQLAlchemy DB Models
-- `schemas.py` → Pydantic Validation Schemas
-- `crud.py` → Reusable CRUD Logic
-- `main.py` → FastAPI Application & Swagger Integration
+
+- `models.py` → SQLAlchemy DB Models  
+- `schemas.py` → Pydantic Validation Schemas  
+- `crud.py` → Reusable CRUD Logic  
+- `main.py` → FastAPI Application & Swagger Integration  
 - ✅ All endpoints tested via Swagger:  
   [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
@@ -85,8 +87,9 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ## 🧪 How to Run
 
 ### 🔸 Prerequisites
-- Python 3.11+
-- PostgreSQL (with DB name: `moptra_ecommerce`)
+
+- Python 3.11+  
+- PostgreSQL (with DB name: `moptra_ecommerce`)  
 - Virtual Environment (recommended)
 
 ### 🔸 1. Install dependencies
