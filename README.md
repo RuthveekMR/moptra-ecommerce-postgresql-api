@@ -55,7 +55,7 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 | ETL & Cleaning   | Python, pandas, Excel, deep_translator |
 | Database         | PostgreSQL                             |
 | ORM & API        | FastAPI, SQLAlchemy, Pydantic          |
-| Interface        | Swagger/OpenAPI                        |
+| Interface        | Swagger                        |
 | Environment      | Uvicorn, SQL Shell(psql), VS Code, Jupyter     |
 
 ---
