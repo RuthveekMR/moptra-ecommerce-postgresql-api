@@ -89,26 +89,55 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ## 🧪 How to Run
 
 ### 🔸 Prerequisites
-
 - Python 3.11+  
 - PostgreSQL (with DB name: `moptra_ecommerce`)  
 - Virtual Environment (recommended)
 
+---
+
 ### 🔸 1. Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
-### 🔸 2. Load the moptra_ecommerce database
+---
 
-Copy the commands listed in moptra_copyable_database_script.txt in your local database (PostgreSQL preferred).
+### 🔸 2. Load the `moptra_ecommerce` database
 
-### 🔸 3. Run the FastAPI server
+- Open `moptra_copyable_database_script.txt`  
+- Replace each `\COPY` path with the **actual location** of the CSV files on your local system.  
+  For example:  
+  ```sql
+  \COPY olist_customers FROM 'C:\\Users\\YourName\\Documents\\olist_customers_dataset.csv' DELIMITER ',' CSV HEADER;
+  ```
+- Then run the full script inside your PostgreSQL shell (`psql`) or pgAdmin to populate the database.
 
+---
+
+### 🔸 3. Configure the database connection
+
+In the file `database.py`, update the `DATABASE_URL` variable with your local PostgreSQL credentials:
+
+```python
+DATABASE_URL = "postgresql://<username>:<password>@localhost:5432/moptra_ecommerce"
+```
+
+Replace `<username>` and `<password>` with your local PostgreSQL username and password.
+
+---
+
+### 🔸 4. Run the FastAPI server
+
+```bash
 uvicorn main:app --reload
+```
 
-### 🔸 Open Swagger UI
+---
 
-Go to 👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+### 🔸 5. Open Swagger UI
+
+Visit 👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser to test all API endpoints.
 
 ---
 
