@@ -23,19 +23,19 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 
 ```bash
 📦 Project Root/
-├── App/                           # Additional components
-├── Apps/                          # Additional modules
-├── Advanced/                      # Advanced features
-├── moptra_database.txt            # Logs of my DB issues + fixes
-├── moptra_notebook.ipynb          # Python notebook used for cleaning
-├── moptra_copyable_database_script.txt # Final Copyable DB creation script
-├── crud.py / crud.cpython-313.pyc
-├── database.py / database.cpython-313.pyc
-├── models.py / models.cpython-313.pyc
-├── schemas.py / schemas.cpython-313.pyc
-├── main.py / main.cpython-313.pyc
-├── requirements.txt               # Required libraries to be installed
-└── README.md                      # 📄 This file
+├── App/                                     # Additional components
+├── Apps/                                    # Additional modules
+├── Advanced/                                # Advanced features
+├── moptra_database.txt                      # Logs of my DB issues + fixes
+├── moptra_notebook.ipynb                    # Python notebook used for cleaning
+├── moptra_copyable_database_script.txt      # Final Copyable DB creation script
+├── crud.py / crud.cpython-313.pyc           # Reusable CRUD Logic
+├── database.py / database.cpython-313.pyc   # PostgreSQL Database connection using SQLAlchemy
+├── models.py / models.cpython-313.pyc       # SQLAlchemy DB Models
+├── schemas.py / schemas.cpython-313.pyc     # Pydantic Validation Schemas
+├── main.py / main.cpython-313.pyc           # FastAPI Application & Swagger Integration
+├── requirements.txt                         # Required libraries to be installed
+└── README.md                                # 📄 This file
 ```
 
 ---
@@ -77,6 +77,7 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 
 ### 🔹 3. RESTful API with FastAPI
 
+- `database.py` → PostgreSQL Database connection using SQLAlchemy
 - `models.py` → SQLAlchemy DB Models  
 - `schemas.py` → Pydantic Validation Schemas  
 - `crud.py` → Reusable CRUD Logic  
