@@ -28,7 +28,7 @@ The project demonstrates how real-world multilingual data can be cleaned, struct
 ├── Advanced/                      # Advanced features
 ├── moptra_database.txt            # Logs of my DB issues + fixes
 ├── moptra_notebook.ipynb          # Python notebook used for cleaning
-├── moptra_copyable_database_script.txt # Final DB creation script
+├── moptra_copyable_database_script.txt # Final Copyable DB creation script
 ├── crud.py / crud.cpython-313.pyc
 ├── database.py / database.cpython-313.pyc
 ├── models.py / models.cpython-313.pyc
